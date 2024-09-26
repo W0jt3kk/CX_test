@@ -7,6 +7,7 @@
 
 <link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
 <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
+
 <df-messenger
   project-id="wirtualna-asystentka-cx"
   agent-id="971672d5-f388-4c83-bc51-97e8945c8ad6"
@@ -17,6 +18,37 @@
    chat-title="Pomoc - eBOK PGNiG">
   </df-messenger-chat-bubble>
 </df-messenger>
+
+<script>
+function changePlaceholder() {
+    const dfMessenger = document.querySelector("df-messenger");
+    if (dfMessenger) {
+        const dfMessengerShadow = dfMessenger.shadowRoot;
+        const dfMessengerChat = dfMessengerShadow.querySelector("df-messenger-chat");
+        if (dfMessengerChat) {
+            const dfMessengerChatShadow = dfMessengerChat.shadowRoot;
+            const dfMessengerUserInput = dfMessengerChatShadow.querySelector("df-messenger-user-input");
+            if (dfMessengerUserInput) {
+                const dfMessengerUserInputShadow = dfMessengerUserInput.shadowRoot;
+                const inputElement = dfMessengerUserInputShadow.querySelector(".input-box-wrapper > input");
+                if (inputElement) {
+                    inputElement.placeholder = "Wpisz swoje pytanie...";
+                } else {
+                    setTimeout(changePlaceholder, 100);
+                }
+            } else {
+                setTimeout(changePlaceholder, 100);
+            }
+        } else {
+            setTimeout(changePlaceholder, 100);
+        }
+    } else {
+        setTimeout(changePlaceholder, 100);
+    }
+}
+changePlaceholder();
+</script>
+
 <style>
   df-messenger {
     z-index: 999;
@@ -25,7 +57,7 @@
     --df-messenger-font-color: #000;
     --df-messenger-font-family: Google Sans;
     --df-messenger-chat-background: #f3f6fc;
-    --df-messenger-chat-window-height: 800px;
+    --df-messenger-chat-window-height: 600px;
     --df-messenger-chat-window-width: 400px;
     --df-messenger-chat-bubble-border: 100px;
     --df-messenger-message-user-background: #ff6309;
@@ -39,30 +71,9 @@
     bottom: 16px;
     right: 16px;
   }
-
-  /* Nowe style do zmiany placeholdera */
-  df-messenger::part(input)::placeholder {
-    content: "Zadaj pytanie...";
-  }
-
-  df-messenger::part(input)::-webkit-input-placeholder {
-    content: "Zadaj pytanie...";
-  }
-
-  df-messenger::part(input)::-moz-placeholder {
-    content: "Zadaj pytanie...";
-  }
-
-  df-messenger::part(input):-ms-input-placeholder {
-    content: "Zadaj pytanie...";
-  }
-
-  df-messenger::part(input):-moz-placeholder {
-    content: "Zadaj pytanie...";
-  }
 </style>	
-	
-	
+    	
+    	
 <body>
 </body>
 </html>
