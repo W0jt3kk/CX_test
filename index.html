@@ -7,7 +7,6 @@
 
 <link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
 <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
-
 <df-messenger
   project-id="wirtualna-asystentka-cx"
   agent-id="971672d5-f388-4c83-bc51-97e8945c8ad6"
@@ -18,37 +17,6 @@
    chat-title="Pomoc - eBOK PGNiG">
   </df-messenger-chat-bubble>
 </df-messenger>
-
-<script>
-function changePlaceholder() {
-    const dfMessenger = document.querySelector("df-messenger");
-    if (dfMessenger) {
-        const dfMessengerShadow = dfMessenger.shadowRoot;
-        const dfMessengerChat = dfMessengerShadow.querySelector("df-messenger-chat");
-        if (dfMessengerChat) {
-            const dfMessengerChatShadow = dfMessengerChat.shadowRoot;
-            const dfMessengerUserInput = dfMessengerChatShadow.querySelector("df-messenger-user-input");
-            if (dfMessengerUserInput) {
-                const dfMessengerUserInputShadow = dfMessengerUserInput.shadowRoot;
-                const inputElement = dfMessengerUserInputShadow.querySelector("textarea.input-box");
-                if (inputElement) {
-                    inputElement.placeholder = "Wpisz swoje pytanie...";
-                } else {
-                    setTimeout(changePlaceholder, 100);
-                }
-            } else {
-                setTimeout(changePlaceholder, 100);
-            }
-        } else {
-            setTimeout(changePlaceholder, 100);
-        }
-    } else {
-        setTimeout(changePlaceholder, 100);
-    }
-}
-changePlaceholder();
-</script>
-
 <style>
   df-messenger {
     z-index: 999;
@@ -72,8 +40,8 @@ changePlaceholder();
     right: 16px;
   }
 </style>	
-    	
-    	
+	
+	
 <body>
 </body>
 </html>
