@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <title>Dokument bez tytułu</title>
+</head>
+
 <link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
 <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
-</head>
-<body>
 <df-messenger
   project-id="wirtualna-asystentka-cx"
   agent-id="971672d5-f388-4c83-bc51-97e8945c8ad6"
@@ -25,7 +25,7 @@
     --df-messenger-font-color: #000;
     --df-messenger-font-family: Google Sans;
     --df-messenger-chat-background: #f3f6fc;
-    --df-messenger-chat-window-height: 800px;
+    --df-messenger-chat-window-height: 600px;
     --df-messenger-chat-window-width: 400px;
     --df-messenger-chat-bubble-border: 100px;
     --df-messenger-message-user-background: #ff6309;
@@ -40,14 +40,28 @@
     right: 16px;
   }
 </style>	
+
 <script>
-setTimeout(function(){
-    document.querySelector("df-messenger")
-        .shadowRoot.querySelector("df-messenger-chat")
-        .shadowRoot.querySelector("df-messenger-user-input")
-        .shadowRoot.querySelector(".input-box-wrapper > input")
-        .placeholder="Zadaj pytanie...";
-}, 1000);
+function changePlaceholder() {
+  const dfMessenger = document.querySelector('df-messenger');
+  if (dfMessenger && dfMessenger.shadowRoot) {
+    const input = dfMessenger.shadowRoot.querySelector('df-messenger-chat')
+      ?.shadowRoot?.querySelector('df-messenger-user-input')
+      ?.shadowRoot?.querySelector('.input-box-wrapper > input');
+    if (input) {
+      input.placeholder = 'Zadaj pytanie...';
+    } else {
+      setTimeout(changePlaceholder, 500);
+    }
+  } else {
+    setTimeout(changePlaceholder, 500);
+  }
+}
+
+// Rozpocznij próby zmiany placeholdera po 2 sekundach od załadowania strony
+setTimeout(changePlaceholder, 2000);
 </script>
+	
+<body>
 </body>
 </html>
