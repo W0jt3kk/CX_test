@@ -30,7 +30,7 @@ function changePlaceholder() {
             const dfMessengerUserInput = dfMessengerChatShadow.querySelector("df-messenger-user-input");
             if (dfMessengerUserInput) {
                 const dfMessengerUserInputShadow = dfMessengerUserInput.shadowRoot;
-                const inputElement = dfMessengerUserInputShadow.querySelector(".input-box-wrapper > input");
+                const inputElement = dfMessengerUserInputShadow.querySelector("textarea.input-box");
                 if (inputElement) {
                     inputElement.placeholder = "Wpisz swoje pytanie...";
                 } else {
