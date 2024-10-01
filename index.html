@@ -3,10 +3,24 @@
 <head>
 <meta charset="utf-8">
 <title>Dokument bez tytułu</title>
-</head>
 
 <link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
 <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
+
+<script>
+  window.onload = function() {
+    setTimeout(function() {
+      const dfMessenger = document.querySelector('df-messenger');
+      const openButton = dfMessenger.shadowRoot.querySelector('df-messenger-chat').shadowRoot.querySelector('div[aria-label="Expand chat"]');
+      if (openButton) {
+        openButton.click();  // Symulujemy kliknięcie, które otworzy chat
+      }
+    }, 1000); // Czekamy 1000 ms, żeby upewnić się, że widget się załadował
+  };
+</script>
+
+</head>
+
 <df-messenger
   project-id="wirtualna-asystentka-cx"
   agent-id="971672d5-f388-4c83-bc51-97e8945c8ad6"
@@ -17,6 +31,7 @@
    chat-title="Pomoc - eBOK PGNiG">
   </df-messenger-chat-bubble>
 </df-messenger>
+
 <style>
   df-messenger {
     z-index: 999;
@@ -40,7 +55,6 @@
     right: 16px;
   }
 </style>	
-	
 	
 <body>
 </body>
