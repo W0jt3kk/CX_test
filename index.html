@@ -44,46 +44,38 @@
   </df-messenger>
 
 <script>
-  window.addEventListener('DOMContentLoaded', () => {
+  window.addEventListener('df-messenger-loaded', () => {
     const sessionFlagKey = 'df-welcome-message-shown';
-
+    
     if (sessionStorage.getItem(sessionFlagKey)) return;
+    sessionStorage.setItem(sessionFlagKey, 'true');
 
-    const checkMessengerReady = setInterval(() => {
-      const dfMessenger = document.querySelector('df-messenger');
-
-      if (dfMessenger && dfMessenger.renderCustomText) {
-        clearInterval(checkMessengerReady);
-
-        sessionStorage.setItem(sessionFlagKey, 'true');
-
-        setTimeout(() => {
-          // Wiadomość powitalna
-          dfMessenger.renderCustomText('Cześć! W czym mogę pomóc?', true);
-
-          // Sugestie w formie przycisków
-          const payload = [
-            {
-              "type": "suggestions",
-              "suggestions": [
-                { "title": "FAQ" },
-                { "title": "Regulamin usługi / Polityka prywatności" }
-              ]
-            }
-          ];
-
-          dfMessenger.renderCustomCard(payload);
-        }, 1500); // Zwiększony timeout dla pewności inicjalizacji
+    const dfMessenger = document.querySelector('df-messenger');
+    
+    // Wiadomość powitalna
+    dfMessenger.renderCustomText('Cześć! W czym mogę pomóc?', true);
+    
+    // Przyciski w formie chipsów
+    const payload = [
+      {
+        "type": "chips",
+        "options": [
+          { "text": "FAQ" },
+          { "text": "Regulamin usługi / Polityka prywatności" }
+        ]
       }
-    }, 100);
+    ];
+    
+    // Dodanie przycisków po 500ms aby mieć pewność kolejności renderowania
+    setTimeout(() => {
+      dfMessenger.renderCustomCard([payload]);
+    }, 500);
   });
 
-  // Nasłuchiwanie kliknięć w sugestie
-  document.addEventListener('click', (e) => {
-    if (e.target.classList.contains('suggestion-item')) {
-      const dfMessenger = document.querySelector('df-messenger');
-      dfMessenger.sendQuery(e.target.textContent);
-    }
+  // Obsługa kliknięć w chipsy
+  window.addEventListener('df-chip-clicked', (event) => {
+    const dfMessenger = document.querySelector('df-messenger');
+    dfMessenger.sendQuery(event.detail.text);
   });
 </script>
 
