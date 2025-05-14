@@ -43,18 +43,23 @@
     </df-messenger-chat-bubble>
   </df-messenger>
 
-  <script>
-    window.addEventListener('DOMContentLoaded', () => {
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const checkMessengerReady = setInterval(() => {
       const dfMessenger = document.querySelector('df-messenger');
 
-      dfMessenger.addEventListener('df-messenger-loaded', () => {
-        // Wyświetlenie niestandardowej wiadomości po 1 sekundzie
+      if (dfMessenger && dfMessenger.renderCustomText) {
+        clearInterval(checkMessengerReady);
+        
+        // Poczekaj dodatkową sekundę, by widget się rozwinął (jeśli auto-open)
         setTimeout(() => {
           dfMessenger.renderCustomText('Cześć! W czym mogę pomóc?', true);
         }, 1000);
-      });
-    });
-  </script>
+      }
+    }, 100); // sprawdzaj co 100ms
+  });
+</script>
+
 
 </body>
 </html>
