@@ -45,20 +45,29 @@
 
 <script>
   window.addEventListener('DOMContentLoaded', () => {
+    const sessionFlagKey = 'df-welcome-message-shown';
+
+    // Jeżeli wiadomość już była pokazana – nie rób nic
+    if (sessionStorage.getItem(sessionFlagKey)) return;
+
     const checkMessengerReady = setInterval(() => {
       const dfMessenger = document.querySelector('df-messenger');
 
       if (dfMessenger && dfMessenger.renderCustomText) {
         clearInterval(checkMessengerReady);
-        
-        // Poczekaj dodatkową sekundę, by widget się rozwinął (jeśli auto-open)
+
+        // Ustaw flagę, że wiadomość już została pokazana w tej sesji
+        sessionStorage.setItem(sessionFlagKey, 'true');
+
+        // Pokaż wiadomość
         setTimeout(() => {
           dfMessenger.renderCustomText('Cześć! W czym mogę pomóc?', true);
         }, 1000);
       }
-    }, 100); // sprawdzaj co 100ms
+    }, 100);
   });
 </script>
+
 
 
 </body>
