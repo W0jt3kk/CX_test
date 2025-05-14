@@ -2,90 +2,64 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Dokument bez tytułu</title>
-
+  <title>Wirtualna Asystentka</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
   <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
-
+  
   <style>
     df-messenger {
-      z-index: 999;
-      position: absolute;
-      --df-messenger-titlebar-title-font-size: 16px;
-      --df-messenger-font-color: #000;
-      --df-messenger-font-family: Google Sans;
+      --df-messenger-button-titlebar-color: #1B4280;
       --df-messenger-chat-background: #f3f6fc;
-      --df-messenger-chat-window-height: 800px;
-      --df-messenger-chat-window-width: 400px;
-      --df-messenger-chat-bubble-border: 100px;
-      --df-messenger-message-user-background: #ff6309;
-      --df-messenger-message-user-font-color: #FFFFFF;
-      --df-messenger-message-bot-background: #1B4280;
-      --df-messenger-message-bot-font-color: #FFFFFF;
-      --df-messenger-message-bot-writing-font-color: #FFFFFF;
-      --df-messenger-message-bot-writing-background: #1B4280;
-      --df-messenger-send-icon-color: #ff6309;
-      bottom: 16px;
-      right: 16px;
+      --df-messenger-font-color: #000;
+      --df-messenger-send-icon: #ff6309;
+      --df-messenger-user-message: #ff6309;
     }
   </style>
 </head>
 
 <body>
-
   <df-messenger
     project-id="wirtualna-asystentka-cx"
     agent-id="971672d5-f388-4c83-bc51-97e8945c8ad6"
     language-code="pl"
-    max-query-length="-1">
-    <df-messenger-chat-bubble chat-title="Wirtualna Asystentka PGNiG">
-    </df-messenger-chat-bubble>
+    chat-title="Wirtualna Asystentka PGNiG">
   </df-messenger>
 
 <script>
-  let initialized = false;
+document.addEventListener('df-messenger-loaded', () => {
+  const dfMessenger = document.querySelector('df-messenger');
+  
+  // Resetowanie sesji dla celów testowych
+  dfMessenger.startNewSession({ retainHistory: false });
 
-  window.addEventListener('df-messenger-loaded', () => {
-    console.log('Messenger loaded'); // 1. Sprawdź czy event jest wywoływany
-    
-    if (initialized) return;
-    initialized = true;
-    
-    const dfMessenger = document.querySelector('df-messenger');
-    
-    // Tymczasowo wyłącz sessionStorage dla testów
-    // sessionStorage.removeItem('df-welcome-shown');
-    
-    if (!sessionStorage.getItem('df-welcome-shown')) {
-      console.log('Rendering text'); // 2. Sprawdź czy dociera do renderowania tekstu
-      dfMessenger.renderCustomText('Cześć! W czym mogę pomóc?', true);
-      
-      setTimeout(() => {
-        const payload = [[
-          {
-            "type": "chips",
-            "options": [
-              {"text": "FAQ"},
-              {"text": "Regulamin usługi / Polityka prywatności"}
-            ]
-          }
-        ]];
-        
-        console.log('Rendering payload:', payload); // 3. Sprawdź strukturę payloadu
-        dfMessenger.renderCustomCard(payload);
-        sessionStorage.setItem('df-welcome-shown', 'true');
-      }, 500);
-    }
-  });
+  // Wiadomość powitalna
+  dfMessenger.renderCustomText('Cześć! W czym mogę pomóc?', true);
 
-  window.addEventListener('df-chip-clicked', (event) => {
-    console.log('Chip clicked:', event.detail); // 4. Sprawdź czy kliknięcia są rejestrowane
-    const dfMessenger = document.querySelector('df-messenger');
-    dfMessenger.sendQuery(event.detail.text);
-  });
+  // Przyciski w formacie Dialogflow CX
+  const payload = {
+    "richContent": [
+      [
+        {
+          "type": "chips",
+          "options": [
+            { "text": "FAQ" },
+            { "text": "Regulamin usługi / Polityka prywatności" }
+          ]
+        }
+      ]
+    ]
+  };
 
-  // Dodatkowe logi inicjalizacji
-  console.log('Script loaded'); // 5. Sprawdź czy główny script się ładuje
+  setTimeout(() => {
+    dfMessenger.renderCustomCard(payload.richContent);
+  }, 1000);
+});
+
+document.addEventListener('df-chip-clicked', (event) => {
+  const dfMessenger = document.querySelector('df-messenger');
+  dfMessenger.sendQuery(event.detail.text);
+});
 </script>
 
 </body>
