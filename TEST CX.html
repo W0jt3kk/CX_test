@@ -2,72 +2,73 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Dokument bez tytułu</title>
-
-  <link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
+  <title>Wirtualna Asystentka PGNiG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet"
+        href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
   <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
-
   <style>
     df-messenger {
       z-index: 999;
       position: absolute;
+      bottom: 16px;
+      right: 16px;
+
       --df-messenger-titlebar-title-font-size: 16px;
       --df-messenger-font-color: #000;
       --df-messenger-font-family: Google Sans;
       --df-messenger-chat-background: #f3f6fc;
-      --df-messenger-chat-window-height: 800px;
-      --df-messenger-chat-window-width: 400px;
-      --df-messenger-chat-bubble-border: 100px;
+      --df-messenger-chat-window-height: 75vh;
+      --df-messenger-chat-window-width: 50vh;
       --df-messenger-message-user-background: #ff6309;
-      --df-messenger-message-user-font-color: #FFFFFF;
+      --df-messenger-message-user-font-color: #FFF;
       --df-messenger-message-bot-background: #1B4280;
-      --df-messenger-message-bot-font-color: #FFFFFF;
-      --df-messenger-message-bot-writing-font-color: #FFFFFF;
-      --df-messenger-message-bot-writing-background: #1B4280;
+      --df-messenger-message-bot-font-color: #FFF;
       --df-messenger-send-icon-color: #ff6309;
-
-      bottom: 16px;
-      right: 16px;
     }
   </style>
 </head>
-
 <body>
 
   <df-messenger
     project-id="wirtualna-asystentka-cx"
     agent-id="971672d5-f388-4c83-bc51-97e8945c8ad6"
     language-code="pl"
+    chat-title="Wirtualna Asystentka PGNiG"
     max-query-length="-1">
-    <df-messenger-chat-bubble chat-title="Wirtualna Asystentka PGNiG">
-    </df-messenger-chat-bubble>
   </df-messenger>
 
-<script>
-  window.addEventListener('DOMContentLoaded', () => {
-    const sessionFlagKey = 'df-welcome-message-shown';
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const SESSION_KEY = 'df-welcome-message-shown';
+      if (sessionStorage.getItem(SESSION_KEY)) return;
 
-    // Jeżeli wiadomość już była pokazana – nie rób nic
-    if (sessionStorage.getItem(sessionFlagKey)) return;
+      const df = document.querySelector('df-messenger');
+      const readyChecker = setInterval(() => {
+        if (df && df.renderCustomText && df.renderCustomCard) {
+          clearInterval(readyChecker);
+          sessionStorage.setItem(SESSION_KEY, '1');
 
-    const checkMessengerReady = setInterval(() => {
-      const dfMessenger = document.querySelector('df-messenger');
+          // 1) Powitanie (renderCustomText nie kosztuje detectIntent)
+          df.renderCustomText('Dzień dobry! Jestem Wirtualną Asystentką eBOK PGNiG. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo - będzie mi Cię łatwiej zrozumieć.', true);
 
-      if (dfMessenger && dfMessenger.renderCustomText) {
-        clearInterval(checkMessengerReady);
-
-        // Ustaw flagę, że wiadomość już została pokazana w tej sesji
-        sessionStorage.setItem(sessionFlagKey, 'true');
-
-        // Pokaż wiadomość
-        setTimeout(() => {
-          dfMessenger.renderCustomText('Cześć! W czym mogę pomóc?', true);
-        }, 1000);
-      }
-    }, 100);
-  });
-</script>
-
+          // 2) Po chwili wstrzykujemy suggestion chips :contentReference[oaicite:0]{index=0}
+          setTimeout(() => {
+            const chipsPayload = [
+              {
+                type: 'chips',
+                options: [
+                  { text: 'Najczęstsze pytania', mode: 'blocking' },
+                  { text: 'Regulamin usługi / Polityka prywatności', mode: 'blocking' }
+                ]
+              }
+            ];
+            df.renderCustomCard(chipsPayload);  // sama wstawi chipsy pod powitaniem :contentReference[oaicite:1]{index=1}
+          }, 1500);
+        }
+      }, 100);
+    });
+  </script>
 
 </body>
 </html>
