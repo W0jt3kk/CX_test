@@ -70,30 +70,8 @@
     });
   </script>
 
-  <script>
-  function setPlaceholderWhenReady() {
-    try {
-      const df = document.querySelector('df-messenger');
-      const chat = df?.shadowRoot?.querySelector('df-messenger-chat');
-      const inputWrapper = chat?.shadowRoot?.querySelector('df-messenger-user-input');
-      const input = inputWrapper?.shadowRoot?.querySelector('.input-box-wrapper > input');
-
-      if (input) {
-        input.placeholder = 'Zadaj pytanie...'; // ← tu wpisz swój tekst
-      } else {
-        // Spróbuj ponownie za chwilę
-        setTimeout(setPlaceholderWhenReady, 200);
-      }
-    } catch (e) {
-      // Jak coś poszło nie tak, spróbuj ponownie
-      setTimeout(setPlaceholderWhenReady, 200);
-    }
-  }
-
-  // Odpal po załadowaniu DOM
-  window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(setPlaceholderWhenReady, 500);
-  });
+<script>
+setTimeout(function(){ document.querySelector("df-messenger").shadowRoot.querySelector("df-messenger-chat").shadowRoot.querySelector("df-messenger-user-input").shadowRoot.querySelector(".input-box-wrapper > input").placeholder="New placeholder text” }, 1000);
 </script>
 
 
