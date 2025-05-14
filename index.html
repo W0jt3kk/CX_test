@@ -49,10 +49,8 @@
           clearInterval(readyChecker);
           sessionStorage.setItem(SESSION_KEY, '1');
 
-          // 1) Powitanie (renderCustomText nie kosztuje detectIntent)
           df.renderCustomText('Dzień dobry! Jestem Wirtualną Asystentką eBOK PGNiG. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo - będzie mi Cię łatwiej zrozumieć.', true);
 
-          // 2) Po chwili wstrzykujemy suggestion chips :contentReference[oaicite:0]{index=0}
           setTimeout(() => {
             const chipsPayload = [
               {
@@ -63,7 +61,7 @@
                 ]
               }
             ];
-            df.renderCustomCard(chipsPayload);  // sama wstawi chipsy pod powitaniem :contentReference[oaicite:1]{index=1}
+            df.renderCustomCard(chipsPayload);
           }, 1500);
         }
       }, 100);
