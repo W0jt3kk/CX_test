@@ -56,13 +56,12 @@
               {
                 type: 'chips',
                 options: [
-                  { text: 'Najczęstsze pytania', mode: 'blocking' },
-                  { text: 'Regulamin usługi / Polityka prywatności', mode: 'blocking' }
+                  { text: 'Najczęstsze pytania' },
+                  { text: 'Regulamin usługi / Polityka prywatności' }
                 ]
               }
             ];
             df.renderCustomCard(chipsPayload);
-            df.sendQuery(' ');
           }, 1500);
         }
       }, 100);
