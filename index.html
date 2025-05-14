@@ -2,9 +2,10 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Dokument bez tytułu</title>
+  <title>Wirtualna Asystentka PGNiG</title>
 
-  <link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
+  <link rel="stylesheet"
+        href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
   <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
 
   <style>
@@ -43,31 +44,75 @@
     </df-messenger-chat-bubble>
   </df-messenger>
 
-<script>
-  window.addEventListener('DOMContentLoaded', () => {
-    const sessionFlagKey = 'df-welcome-message-shown';
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const sessionFlagKey = 'df-welcome-message-shown';
 
-    // Jeżeli wiadomość już była pokazana – nie rób nic
-    if (sessionStorage.getItem(sessionFlagKey)) return;
+      // jeśli już pokazaliśmy, to koniec
+      if (sessionStorage.getItem(sessionFlagKey)) return;
 
-    const checkMessengerReady = setInterval(() => {
-      const dfMessenger = document.querySelector('df-messenger');
+      const checkMessengerReady = setInterval(() => {
+        const dfMessenger = document.querySelector('df-messenger');
+        if (dfMessenger && dfMessenger.renderCustomText) {
+          clearInterval(checkMessengerReady);
+          sessionStorage.setItem(sessionFlagKey, 'true');
 
-      if (dfMessenger && dfMessenger.renderCustomText) {
-        clearInterval(checkMessengerReady);
-
-        // Ustaw flagę, że wiadomość już została pokazana w tej sesji
-        sessionStorage.setItem(sessionFlagKey, 'true');
-
-        // Pokaż wiadomość
-        setTimeout(() => {
+          // 1) Wyświetl powitanie
           dfMessenger.renderCustomText('Cześć! W czym mogę pomóc?', true);
-        }, 1000);
-      }
-    }, 100);
-  });
-</script>
 
+          // 2) Po chwili dodajmy przyciski
+          setTimeout(() => {
+            // Znajdź wrapper wiadomości wewnątrz shadow DOM
+            const chat = dfMessenger.shadowRoot.querySelector('df-messenger-chat');
+            const wrapper = chat?.shadowRoot.querySelector('.chat-wrapper');
+            if (!wrapper) return;
+
+            // Kontener na przyciski
+            const chipContainer = document.createElement('div');
+            chipContainer.style.cssText = `
+              margin: 12px 16px;
+              display: flex;
+              flex-wrap: wrap;
+              gap: 8px;
+            `;
+
+            // Wspólne style dla przycisków
+            const btnStyles = `
+              background-color: #e1e8f6;
+              color: #1B4280;
+              border: none;
+              padding: 8px 12px;
+              border-radius: 16px;
+              font-family: Google Sans, sans-serif;
+              cursor: pointer;
+              font-size: 14px;
+            `;
+
+            // Funkcja tworząca pojedynczy guzik
+            const makeBtn = (label, query) => {
+              const b = document.createElement('button');
+              b.textContent = label;
+              b.style.cssText = btnStyles;
+              b.onclick = () => {
+                dfMessenger.sendQuery(query);
+                chipContainer.remove(); // usuń guziki po kliknięciu
+              };
+              return b;
+            };
+
+            // Dodajemy oba
+            chipContainer.append(
+              makeBtn('FAQ', 'FAQ'),
+              makeBtn('Regulamin usługi / Polityka prywatności', 'Regulamin')
+            );
+
+            // Dołączamy pod wiadomościami
+            wrapper.appendChild(chipContainer);
+          }, 1500);
+        }
+      }, 100);
+    });
+  </script>
 
 </body>
 </html>
