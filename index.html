@@ -44,85 +44,75 @@
   </df-messenger>
 
 <script>
-  window.addEventListener('DOMContentLoaded', () => {
-    const welcomeKey = 'df-welcome-message-shown';
-    const chipsKey   = 'df-chips-shown';
-    const dfMessenger = document.querySelector('df-messenger');
+  // FLAGI: raz na sesję
+  const WELCOME_KEY = 'df-welcome-message-shown';
+  const CHIPS_KEY   = 'df-chips-shown';
 
-    // 1) Powitanie raz na sesję
-    dfMessenger.addEventListener('df-messenger-loaded', () => {
-      if (!sessionStorage.getItem(welcomeKey)) {
-        dfMessenger.renderCustomText('Cześć! W czym mogę pomóc?', true);
-        sessionStorage.setItem(welcomeKey, 'true');
-      }
-    });
+  // 1) POWITANIE – gdy widget jest gotowy
+  window.addEventListener('df-messenger-loaded', () => {
+    if (sessionStorage.getItem(WELCOME_KEY)) return;
+    const df = document.querySelector('df-messenger');
+    df.renderCustomText('Cześć! W czym mogę pomóc?', true);
+    sessionStorage.setItem(WELCOME_KEY, '1');
+  });
 
-    // 2) Przyciski po pierwszym otwarciu czatu
-    window.addEventListener('df-chat-open-changed', (e) => {
-      if (!e.detail.isOpen || sessionStorage.getItem(chipsKey)) return;
+  // 2) PRZYCISKI – po otwarciu czatu
+  window.addEventListener('df-chat-open-changed', (e) => {
+    // tylko gdy otwieramy, i jeszcze nie wyświetliliśmy chipów
+    if (!e.detail.isOpen || sessionStorage.getItem(CHIPS_KEY)) return;
+    sessionStorage.setItem(CHIPS_KEY, '1');
 
-      const appendChipsTo = (wrapper) => {
-        const chipContainer = document.createElement('div');
-        chipContainer.style.cssText = `
-          margin: 12px 16px;
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-        `;
+    const df = document.querySelector('df-messenger');
 
-        const btnStyles = `
-          background-color: #e1e8f6;
-          color: #1B4280;
-          border: none;
-          padding: 8px 12px;
-          border-radius: 16px;
-          font-family: Google Sans, sans-serif;
-          cursor: pointer;
-          font-size: 14px;
-        `;
+    // czekamy, aż pojawi się <df-messenger-chat> i .chat-wrapper w jego shadowRoot
+    const waitForWrapper = () => {
+      const chat = df.shadowRoot.querySelector('df-messenger-chat');
+      if (!chat) return requestAnimationFrame(waitForWrapper);
+      const wrapper = chat.shadowRoot.querySelector('.chat-wrapper');
+      if (!wrapper) return requestAnimationFrame(waitForWrapper);
 
-        const makeBtn = (label, query) => {
-          const b = document.createElement('button');
-          b.textContent = label;
-          b.style.cssText = btnStyles;
-          b.onclick = () => {
-            dfMessenger.sendQuery(query);
-            chipContainer.remove();
-          };
-          return b;
+      // TWORZYMY KONTENER I PRZYCISKI
+      const chipContainer = document.createElement('div');
+      chipContainer.style.cssText = `
+        margin: 12px 16px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      `;
+
+      const btnStyles = `
+        background-color: #e1e8f6;
+        color: #1B4280;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 16px;
+        font-family: Google Sans, sans-serif;
+        cursor: pointer;
+        font-size: 14px;
+      `;
+
+      const makeBtn = (label, query) => {
+        const b = document.createElement('button');
+        b.textContent = label;
+        b.style.cssText = btnStyles;
+        b.onclick = () => {
+          df.sendQuery(query);
+          chipContainer.remove();
         };
-
-        chipContainer.append(
-          makeBtn('FAQ', 'FAQ'),
-          makeBtn('Regulamin usługi / Polityka prywatności', 'Regulamin')
-        );
-
-        wrapper.appendChild(chipContainer);
-        sessionStorage.setItem(chipsKey, 'true');
+        return b;
       };
 
-      // Czekamy na .chat-wrapper wewnątrz shadow DOM
-      const chat = dfMessenger.shadowRoot.querySelector('df-messenger-chat');
-      const wrapper = chat?.shadowRoot.querySelector('.chat-wrapper');
-      if (wrapper) {
-        appendChipsTo(wrapper);
-      } else {
-        // jeśli jeszcze nie ma, pollujemy z requestAnimationFrame
-        const waitWrap = () => {
-          const c = dfMessenger.shadowRoot.querySelector('df-messenger-chat');
-          const w = c?.shadowRoot.querySelector('.chat-wrapper');
-          if (w) {
-            appendChipsTo(w);
-          } else {
-            requestAnimationFrame(waitWrap);
-          }
-        };
-        waitWrap();
-      }
-    });
+      chipContainer.append(
+        makeBtn('FAQ', 'FAQ'),
+        makeBtn('Regulamin usługi / Polityka prywatności', 'Regulamin')
+      );
+
+      wrapper.appendChild(chipContainer);
+    };
+
+    waitForWrapper();
   });
 </script>
-
 
 </body>
 </html>
