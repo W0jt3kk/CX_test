@@ -25,7 +25,6 @@
       --df-messenger-message-bot-writing-font-color: #FFFFFF;
       --df-messenger-message-bot-writing-background: #1B4280;
       --df-messenger-send-icon-color: #ff6309;
-
       bottom: 16px;
       right: 16px;
     }
@@ -44,32 +43,37 @@
   </df-messenger>
 
 <script>
-  window.addEventListener('df-messenger-loaded', () => {
-    const sessionFlagKey = 'df-welcome-message-shown';
-    
-    if (sessionStorage.getItem(sessionFlagKey)) return;
-    sessionStorage.setItem(sessionFlagKey, 'true');
+  let initialized = false;
 
+  window.addEventListener('df-messenger-loaded', () => {
+    if (initialized) return;
+    initialized = true;
+    
     const dfMessenger = document.querySelector('df-messenger');
     
-    // Wiadomość powitalna
-    dfMessenger.renderCustomText('Cześć! W czym mogę pomóc?', true);
+    // Reset session storage przy każdym przeładowaniu strony do testów
+    sessionStorage.removeItem('df-welcome-shown');
     
-    // Przyciski w formie chipsów
-    const payload = [
-      {
-        "type": "chips",
-        "options": [
-          { "text": "FAQ" },
-          { "text": "Regulamin usługi / Polityka prywatności" }
-        ]
-      }
-    ];
-    
-    // Dodanie przycisków po 500ms aby mieć pewność kolejności renderowania
-    setTimeout(() => {
-      dfMessenger.renderCustomCard([payload]);
-    }, 500);
+    if (!sessionStorage.getItem('df-welcome-shown')) {
+      // Krok 1: Wiadomość powitalna
+      dfMessenger.renderCustomText('Cześć! W czym mogę pomóc?', true);
+      
+      // Krok 2: Przyciski po 500ms
+      setTimeout(() => {
+        const payload = [[  // ZWRÓĆ UWAGĘ NA PODWÓJNĄ TABLICĘ
+          {
+            "type": "chips",
+            "options": [
+              {"text": "FAQ"},
+              {"text": "Regulamin usługi / Polityka prywatności"}
+            ]
+          }
+        ]];
+        
+        dfMessenger.renderCustomCard(payload);
+        sessionStorage.setItem('df-welcome-shown', 'true');
+      }, 500);
+    }
   });
 
   // Obsługa kliknięć w chipsy
