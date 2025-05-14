@@ -38,58 +38,64 @@
     max-query-length="-1">
   </df-messenger>
 
-<script>
-  window.addEventListener('DOMContentLoaded', () => {
-    const SESSION_KEY = 'df-welcome-message-shown';
-    const df = document.querySelector('df-messenger');
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const SESSION_KEY = 'df-welcome-message-shown';
+      if (sessionStorage.getItem(SESSION_KEY)) return;
 
-    // Zmiana placeholdera (działa zawsze, niezależnie od sesji)
-    const setCustomPlaceholder = () => {
+      const df = document.querySelector('df-messenger');
+      const readyChecker = setInterval(() => {
+        if (df && df.renderCustomText && df.renderCustomCard) {
+          clearInterval(readyChecker);
+          sessionStorage.setItem(SESSION_KEY, '1');
+
+          // 1) Powitanie (renderCustomText nie kosztuje detectIntent)
+          df.renderCustomText('Dzień dobry! Jestem Wirtualną Asystentką eBOK PGNiG. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo - będzie mi Cię łatwiej zrozumieć.', true);
+
+          // 2) Po chwili wstrzykujemy suggestion chips :contentReference[oaicite:0]{index=0}
+          setTimeout(() => {
+            const chipsPayload = [
+              {
+                type: 'chips',
+                options: [
+                  { text: 'Najczęstsze pytania' },
+                  { text: 'Regulamin usługi / Polityka prywatności' }
+                ]
+              }
+            ];
+            df.renderCustomCard(chipsPayload);  // sama wstawi chipsy pod powitaniem :contentReference[oaicite:1]{index=1}
+          }, 1500);
+        }
+      }, 100);
+    });
+  </script>
+
+  <script>
+  function setPlaceholderWhenReady() {
+    try {
+      const df = document.querySelector('df-messenger');
       const chat = df?.shadowRoot?.querySelector('df-messenger-chat');
       const inputWrapper = chat?.shadowRoot?.querySelector('df-messenger-user-input');
-      const inputField = inputWrapper?.shadowRoot?.querySelector('.input-box-wrapper > input');
+      const input = inputWrapper?.shadowRoot?.querySelector('.input-box-wrapper > input');
 
-      if (inputField) {
-        inputField.placeholder = 'Czekam na Twoje pytanie';
+      if (input) {
+        input.placeholder = 'Zadaj pytanie...'; // ← tu wpisz swój tekst
       } else {
-        requestAnimationFrame(setCustomPlaceholder);
+        // Spróbuj ponownie za chwilę
+        setTimeout(setPlaceholderWhenReady, 200);
       }
-    };
+    } catch (e) {
+      // Jak coś poszło nie tak, spróbuj ponownie
+      setTimeout(setPlaceholderWhenReady, 200);
+    }
+  }
 
-    // Uruchom sprawdzanie placeholdera niezależnie od sesji
-    requestAnimationFrame(setCustomPlaceholder);
-
-    // Jeśli już było powitanie, nic nie robimy
-    if (sessionStorage.getItem(SESSION_KEY)) return;
-
-    const readyChecker = setInterval(() => {
-      if (df && df.renderCustomText && df.renderCustomCard) {
-        clearInterval(readyChecker);
-        sessionStorage.setItem(SESSION_KEY, '1');
-
-        // Powitanie
-        df.renderCustomText(
-          'Dzień dobry! Jestem Wirtualną Asystentką eBOK PGNiG. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo - będzie mi Cię łatwiej zrozumieć.',
-          true
-        );
-
-        // Chipsy
-        setTimeout(() => {
-          const chipsPayload = [
-            {
-              type: 'chips',
-              options: [
-                { text: 'Najczęstsze pytania' },
-                { text: 'Regulamin usługi / Polityka prywatności' }
-              ]
-            }
-          ];
-          df.renderCustomCard(chipsPayload);
-        }, 1500);
-      }
-    }, 100);
+  // Odpal po załadowaniu DOM
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(setPlaceholderWhenReady, 500);
   });
 </script>
+
 
 </body>
 </html>
