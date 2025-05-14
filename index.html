@@ -46,21 +46,22 @@
   let initialized = false;
 
   window.addEventListener('df-messenger-loaded', () => {
+    console.log('Messenger loaded'); // 1. Sprawdź czy event jest wywoływany
+    
     if (initialized) return;
     initialized = true;
     
     const dfMessenger = document.querySelector('df-messenger');
     
-    // Reset session storage przy każdym przeładowaniu strony do testów
-    sessionStorage.removeItem('df-welcome-shown');
+    // Tymczasowo wyłącz sessionStorage dla testów
+    // sessionStorage.removeItem('df-welcome-shown');
     
     if (!sessionStorage.getItem('df-welcome-shown')) {
-      // Krok 1: Wiadomość powitalna
+      console.log('Rendering text'); // 2. Sprawdź czy dociera do renderowania tekstu
       dfMessenger.renderCustomText('Cześć! W czym mogę pomóc?', true);
       
-      // Krok 2: Przyciski po 500ms
       setTimeout(() => {
-        const payload = [[  // ZWRÓĆ UWAGĘ NA PODWÓJNĄ TABLICĘ
+        const payload = [[
           {
             "type": "chips",
             "options": [
@@ -70,17 +71,21 @@
           }
         ]];
         
+        console.log('Rendering payload:', payload); // 3. Sprawdź strukturę payloadu
         dfMessenger.renderCustomCard(payload);
         sessionStorage.setItem('df-welcome-shown', 'true');
       }, 500);
     }
   });
 
-  // Obsługa kliknięć w chipsy
   window.addEventListener('df-chip-clicked', (event) => {
+    console.log('Chip clicked:', event.detail); // 4. Sprawdź czy kliknięcia są rejestrowane
     const dfMessenger = document.querySelector('df-messenger');
     dfMessenger.sendQuery(event.detail.text);
   });
+
+  // Dodatkowe logi inicjalizacji
+  console.log('Script loaded'); // 5. Sprawdź czy główny script się ładuje
 </script>
 
 </body>
