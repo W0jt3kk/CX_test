@@ -4,19 +4,14 @@
   <meta charset="utf-8">
   <title>Wirtualna Asystentka PGNiG</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- Dialogflow Messenger -->
-  <link rel="stylesheet"
-        href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
+  <link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
   <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
-
   <style>
     df-messenger {
       z-index: 999;
       position: absolute;
       bottom: 16px;
       right: 16px;
-
       --df-messenger-titlebar-title-font-size: 16px;
       --df-messenger-font-color: #000;
       --df-messenger-font-family: Google Sans;
@@ -32,7 +27,6 @@
   </style>
 </head>
 <body>
-
   <df-messenger
     project-id="wirtualna-asystentka-cx"
     agent-id="971672d5-f388-4c83-bc51-97e8945c8ad6"
@@ -46,37 +40,25 @@
     window.addEventListener('DOMContentLoaded', () => {
       const SESSION_KEY = 'df-welcome-message-shown';
       if (sessionStorage.getItem(SESSION_KEY)) return;
-
       const df = document.querySelector('df-messenger');
 
-      /* -------------------------- funkcja pomocnicza -------------------------- */
       const trySetPlaceholder = chatBubble => {
-        /*  zgodnie ze wskazówką programisty:                           *
-         *  chatBubble → df-messenger-chat → df-messenger-user-input    *
-         *  → .input-box-wrapper .input-content-wrapper .input-box      */
         const chat = chatBubble.shadowRoot?.querySelector('df-messenger-chat');
         const userInputContainer = chat?.shadowRoot?.querySelector('df-messenger-user-input');
-        const inputBox = userInputContainer?.shadowRoot?.querySelector(
-          '.input-box-wrapper .input-content-wrapper .input-box'
-        );
-
+        const inputBox = userInputContainer?.shadowRoot?.querySelector('.input-box-wrapper .input-content-wrapper .input-box');
         if (inputBox) {
-          inputBox.setAttribute('placeholder', 'Zadaj pytanie');   // ← tutaj zmień tekst, jeśli trzeba
+          inputBox.setAttribute('placeholder', 'Zadaj pytanie');
           return true;
         }
         return false;
       };
 
-      /* --------------------------- logika startowa --------------------------- */
       const readyChecker = setInterval(() => {
         if (df && df.renderCustomText && df.renderCustomCard) {
           clearInterval(readyChecker);
           sessionStorage.setItem(SESSION_KEY, '1');
 
-          df.renderCustomText(
-            'Dzień dobry! Jestem Wirtualną Asystentką PGNiG. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo – będzie mi Cię łatwiej zrozumieć.',
-            true
-          );
+          df.renderCustomText('Dzień dobry! Jestem Wirtualną Asystentką PGNiG. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo – będzie mi Cię łatwiej zrozumieć.', true);
 
           setTimeout(() => {
             const chipsPayload = [{
@@ -89,18 +71,14 @@
             df.renderCustomCard(chipsPayload);
           }, 1500);
 
-          /* ---------------------- bąbelek czatu + placeholder ---------------------- */
           const chatBubble = document.createElement('df-messenger-chat-bubble');
           chatBubble.setAttribute('chat-icon', 'https://ebok.pgnig.pl/assets/ico/favicon-36x36.png');
           chatBubble.setAttribute('chat-title', 'Wirtualna Asystentka PGNiG');
           df.appendChild(chatBubble);
 
-          /* 1) próba od razu (gdyby okno czatu otworzyło się automatycznie) */
           trySetPlaceholder(chatBubble);
 
-          /* 2) każdorazowo po kliknięciu w bąbelek  */
           chatBubble.addEventListener('click', () => {
-            /* polling co 150 ms aż <input> będzie w DOM – potem przerywamy */
             const pollId = setInterval(() => {
               if (trySetPlaceholder(chatBubble)) clearInterval(pollId);
             }, 150);
@@ -109,6 +87,5 @@
       }, 100);
     });
   </script>
-
 </body>
 </html>
