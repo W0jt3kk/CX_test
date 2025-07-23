@@ -37,57 +37,49 @@
     chat-icon="https://ebok.pgnig.pl/assets/ico/favicon-36x36.png">
   </df-messenger>
 
-<script>
-  window.addEventListener('DOMContentLoaded', () => {
-    const SESSION_KEY = 'df-welcome-message-shown';
-    if (sessionStorage.getItem(SESSION_KEY)) return;
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const SESSION_KEY = 'df-welcome-message-shown';
+      if (sessionStorage.getItem(SESSION_KEY)) return;
 
-    const df = document.querySelector('df-messenger');
-    const readyChecker = setInterval(() => {
-      if (df && df.renderCustomText && df.renderCustomCard) {
-        clearInterval(readyChecker);
-        sessionStorage.setItem(SESSION_KEY, '1');
+      const df = document.querySelector('df-messenger');
+      const readyChecker = setInterval(() => {
+        if (df && df.renderCustomText && df.renderCustomCard) {
+          clearInterval(readyChecker);
+          sessionStorage.setItem(SESSION_KEY, '1');
 
-        df.renderCustomText(
-          'Dzień dobry! Jestem Wirtualną Asystentką PGNiG. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo - będzie mi Cię łatwiej zrozumieć.',
-          true
-        );
+          df.renderCustomText('Dzień dobry! Jestem Wirtualną Asystentką PGNiG. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo - będzie mi Cię łatwiej zrozumieć.', true);
 
-        setTimeout(() => {
-          const chipsPayload = [
-            {
-              type: 'chips',
-              options: [
-                { text: 'Najczęstsze pytania' },
-                { text: 'Regulamin usługi / Polityka prywatności' }
-              ]
-            }
-          ];
-          df.renderCustomCard(chipsPayload);
-        }, 1500);
+          setTimeout(() => {
+            const chipsPayload = [
+              {
+                type: 'chips',
+                options: [
+                  { text: 'Najczęstsze pytania' },
+                  { text: 'Regulamin usługi / Polityka prywatności' }
+                ]
+              }
+            ];
+            df.renderCustomCard(chipsPayload);
+          }, 1500);
 
-        // TWORZENIE BUBBLA
-        const chatBubble = document.createElement('df-messenger-chat-bubble');
-        chatBubble.setAttribute('chat-icon', 'https://ebok.pgnig.pl/assets/ico/favicon-36x36.png');
-        chatBubble.setAttribute('chat-title', 'Wirtualna Asystentka PGNiG');
+          const chatBubble = document.createElement('df-messenger-chat-bubble');
+          chatBubble.setAttribute('chat-icon', 'https://ebok.pgnig.pl/assets/ico/favicon-36x36.png');+
+          chatBubble.setAttribute('chat-title', 'Wirtualna Asystentka PGNiG');
+          df.appendChild(chatBubble);
+        }
+      }, 100);
+    });
+  </script>
 
-        // 🔽 USTAWIAMY PLACEHOLDER, ALE DOPIERO PO DODANIU BUBBLA
-        df.appendChild(chatBubble);
-
-        // Czekamy aż zrenderuje się input
-        const placeholderChecker = setInterval(() => {
-          const chat = chatBubble.shadowRoot?.querySelector('df-messenger-chat');
-          const userInputContainer = chat?.shadowRoot?.querySelector('df-messenger-user-input');
-          const inputBox = userInputContainer?.shadowRoot?.querySelector('.input-box-wrapper input');
-
-          if (inputBox) {
-            inputBox.setAttribute('placeholder', 'Tutaj wpisz swoje pytanie');
-            clearInterval(placeholderChecker); // kończymy sprawdzanie
-          }
-        }, 200);
-      }
-    }, 100);
-  });
-</script>
+  <script>
+    setTimeout(function(){
+      document.querySelector("df-messenger")
+        .shadowRoot.querySelector("df-messenger-chat")
+        .shadowRoot.querySelector("df-messenger-user-input")
+        .shadowRoot.querySelector(".input-box-wrapper > input")
+        .placeholder = "New placeholder text";
+    }, 1000);
+  </script>
 
 </body>
