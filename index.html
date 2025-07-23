@@ -26,8 +26,6 @@
     }
     df-messenger-chat-bubble {
       --df-messenger-chat-bubble-background: #FFF;
-      box-shadow: 0 4px 8px rgba(0,0,0,.25);
-      border-radius: var(--df-messenger-chat-bubble-border-radius,32px);
     }
   </style>
 </head>
@@ -79,6 +77,9 @@
           const chatBubble = document.createElement('df-messenger-chat-bubble');
           chatBubble.setAttribute('chat-icon', 'https://ebok.pgnig.pl/assets/ico/favicon-36x36.png');
           chatBubble.setAttribute('chat-title', 'Wirtualna Asystentka PGNiG');
+          chatBubble.style.setProperty('--df-messenger-chat-bubble-background', '#ffffff');
+          chatBubble.style.boxShadow = '0 4px 8px rgba(0,0,0,.25)';
+          chatBubble.style.borderRadius = '32px';
           df.appendChild(chatBubble);
 
           trySetPlaceholder(chatBubble);
