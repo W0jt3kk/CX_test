@@ -5,12 +5,11 @@
   <title>Wirtualna Asystentka PGNiG</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Dialogflow Messenger -->
+  <!-- Dialogflow Messenger -->
   <link rel="stylesheet"
         href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
   <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
 
-  <!-- Styl widgetu -->
   <style>
     df-messenger {
       z-index: 999;
@@ -34,7 +33,6 @@
 </head>
 <body>
 
-  <!-- Komponent DF Messenger -->
   <df-messenger
     project-id="wirtualna-asystentka-cx"
     agent-id="971672d5-f388-4c83-bc51-97e8945c8ad6"
@@ -51,31 +49,25 @@
 
       const df = document.querySelector('df-messenger');
 
-      /* ---------- 1. Funkcja zmieniająca placeholder ---------- */
-      const changePlaceholder = () => {
-        const chat      = df.shadowRoot?.querySelector('df-messenger-chat');
-        const userInput = chat?.shadowRoot?.querySelector('df-messenger-user-input');
-        const inputBox  = userInput?.shadowRoot?.querySelector(
+      /* -------------------------- funkcja pomocnicza -------------------------- */
+      const trySetPlaceholder = chatBubble => {
+        /*  zgodnie ze wskazówką programisty:                           *
+         *  chatBubble → df-messenger-chat → df-messenger-user-input    *
+         *  → .input-box-wrapper .input-content-wrapper .input-box      */
+        const chat = chatBubble.shadowRoot?.querySelector('df-messenger-chat');
+        const userInputContainer = chat?.shadowRoot?.querySelector('df-messenger-user-input');
+        const inputBox = userInputContainer?.shadowRoot?.querySelector(
           '.input-box-wrapper .input-content-wrapper .input-box'
         );
 
         if (inputBox) {
-          inputBox.setAttribute('placeholder', 'Zadaj pytanie'); // <- zmień tekst, jeśli chcesz
+          inputBox.setAttribute('placeholder', 'Zadaj pytanie');   // ← tutaj zmień tekst, jeśli trzeba
           return true;
         }
         return false;
       };
 
-      /* ---------- 2. Czekamy aż widget będzie gotowy ---------- */
-      const pollUntilReady = () => {
-        if (!changePlaceholder()) {
-          const id = setInterval(() => {
-            if (changePlaceholder()) clearInterval(id);
-          }, 200);
-        }
-      };
-
-      /* ---------- 3. Logika powitalna ---------- */
+      /* --------------------------- logika startowa --------------------------- */
       const readyChecker = setInterval(() => {
         if (df && df.renderCustomText && df.renderCustomCard) {
           clearInterval(readyChecker);
@@ -97,17 +89,22 @@
             df.renderCustomCard(chipsPayload);
           }, 1500);
 
-          /* ---------- 4. Tworzymy bąbelek czatu ---------- */
+          /* ---------------------- bąbelek czatu + placeholder ---------------------- */
           const chatBubble = document.createElement('df-messenger-chat-bubble');
           chatBubble.setAttribute('chat-icon', 'https://ebok.pgnig.pl/assets/ico/favicon-36x36.png');
           chatBubble.setAttribute('chat-title', 'Wirtualna Asystentka PGNiG');
           df.appendChild(chatBubble);
 
-          /* 5. Zmieniamy placeholder, gdy użytkownik otworzy czat */
-          chatBubble.addEventListener('click', pollUntilReady);
+          /* 1) próba od razu (gdyby okno czatu otworzyło się automatycznie) */
+          trySetPlaceholder(chatBubble);
 
-          /* 6. Na wszelki wypadek – jedna próba od razu po załadowaniu */
-          pollUntilReady();
+          /* 2) każdorazowo po kliknięciu w bąbelek  */
+          chatBubble.addEventListener('click', () => {
+            /* polling co 150 ms aż <input> będzie w DOM – potem przerywamy */
+            const pollId = setInterval(() => {
+              if (trySetPlaceholder(chatBubble)) clearInterval(pollId);
+            }, 150);
+          });
         }
       }, 100);
     });
