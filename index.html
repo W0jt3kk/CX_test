@@ -1,10 +1,16 @@
+<!DOCTYPE html>
+<html lang="pl">
 <head>
   <meta charset="utf-8">
   <title>Wirtualna Asystentka PGNiG</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Dialogflow Messenger -->
   <link rel="stylesheet"
         href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
   <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
+
+  <!-- Styl widgetu -->
   <style>
     df-messenger {
       z-index: 999;
@@ -28,6 +34,7 @@
 </head>
 <body>
 
+  <!-- Komponent DF Messenger -->
   <df-messenger
     project-id="wirtualna-asystentka-cx"
     agent-id="971672d5-f388-4c83-bc51-97e8945c8ad6"
@@ -43,43 +50,68 @@
       if (sessionStorage.getItem(SESSION_KEY)) return;
 
       const df = document.querySelector('df-messenger');
+
+      /* ---------- 1. Funkcja zmieniająca placeholder ---------- */
+      const changePlaceholder = () => {
+        const chat      = df.shadowRoot?.querySelector('df-messenger-chat');
+        const userInput = chat?.shadowRoot?.querySelector('df-messenger-user-input');
+        const inputBox  = userInput?.shadowRoot?.querySelector(
+          '.input-box-wrapper .input-content-wrapper .input-box'
+        );
+
+        if (inputBox) {
+          inputBox.setAttribute('placeholder', 'Zadaj pytanie'); // <- zmień tekst, jeśli chcesz
+          return true;
+        }
+        return false;
+      };
+
+      /* ---------- 2. Czekamy aż widget będzie gotowy ---------- */
+      const pollUntilReady = () => {
+        if (!changePlaceholder()) {
+          const id = setInterval(() => {
+            if (changePlaceholder()) clearInterval(id);
+          }, 200);
+        }
+      };
+
+      /* ---------- 3. Logika powitalna ---------- */
       const readyChecker = setInterval(() => {
         if (df && df.renderCustomText && df.renderCustomCard) {
           clearInterval(readyChecker);
           sessionStorage.setItem(SESSION_KEY, '1');
 
-          df.renderCustomText('Dzień dobry! Jestem Wirtualną Asystentką PGNiG. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo - będzie mi Cię łatwiej zrozumieć.', true);
+          df.renderCustomText(
+            'Dzień dobry! Jestem Wirtualną Asystentką PGNiG. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo – będzie mi Cię łatwiej zrozumieć.',
+            true
+          );
 
           setTimeout(() => {
-            const chipsPayload = [
-              {
-                type: 'chips',
-                options: [
-                  { text: 'Najczęstsze pytania' },
-                  { text: 'Regulamin usługi / Polityka prywatności' }
-                ]
-              }
-            ];
+            const chipsPayload = [{
+              type: 'chips',
+              options: [
+                { text: 'Najczęstsze pytania' },
+                { text: 'Regulamin usługi / Polityka prywatności' }
+              ]
+            }];
             df.renderCustomCard(chipsPayload);
           }, 1500);
 
+          /* ---------- 4. Tworzymy bąbelek czatu ---------- */
           const chatBubble = document.createElement('df-messenger-chat-bubble');
-          chatBubble.setAttribute('chat-icon', 'https://ebok.pgnig.pl/assets/ico/favicon-36x36.png');+
+          chatBubble.setAttribute('chat-icon', 'https://ebok.pgnig.pl/assets/ico/favicon-36x36.png');
           chatBubble.setAttribute('chat-title', 'Wirtualna Asystentka PGNiG');
           df.appendChild(chatBubble);
+
+          /* 5. Zmieniamy placeholder, gdy użytkownik otworzy czat */
+          chatBubble.addEventListener('click', pollUntilReady);
+
+          /* 6. Na wszelki wypadek – jedna próba od razu po załadowaniu */
+          pollUntilReady();
         }
       }, 100);
     });
   </script>
 
-  <script>
-    setTimeout(function(){
-      document.querySelector("df-messenger")
-        .shadowRoot.querySelector("df-messenger-chat")
-        .shadowRoot.querySelector("df-messenger-user-input")
-        .shadowRoot.querySelector(".input-box-wrapper > input")
-        .placeholder = "New placeholder text";
-    }, 1000);
-  </script>
-
 </body>
+</html>
