@@ -1,5 +1,3 @@
-<!doctype html>
-<html>
 <head>
   <meta charset="utf-8">
   <title>Wirtualna Asystentka PGNiG</title>
@@ -50,10 +48,7 @@
           clearInterval(readyChecker);
           sessionStorage.setItem(SESSION_KEY, '1');
 
-          df.renderCustomText(
-            'Dzień dobry! Jestem Wirtualną Asystentką eBOK PGNiG. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo - będzie mi Cię łatwiej zrozumieć.',
-            true
-          );
+          df.renderCustomText('Dzień dobry! Jestem Wirtualną Asystentką PGNiG. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo - będzie mi Cię łatwiej zrozumieć.', true);
 
           setTimeout(() => {
             const chipsPayload = [
@@ -67,33 +62,23 @@
             ];
             df.renderCustomCard(chipsPayload);
           }, 1500);
-        }
-      }, 100);
 
-      setTimeout(() => {
-        const df = document.querySelector('df-messenger');
-
-        if (!df.querySelector('df-messenger-chat-bubble')) {
           const chatBubble = document.createElement('df-messenger-chat-bubble');
           chatBubble.setAttribute('chat-icon', 'https://ebok.pgnig.pl/assets/ico/favicon-36x36.png');
           df.appendChild(chatBubble);
         }
-
-        try {
-          const inputEl = df.shadowRoot
-            ?.querySelector("df-messenger-chat")
-            ?.shadowRoot?.querySelector("df-messenger-user-input")
-            ?.shadowRoot?.querySelector(".input-box-wrapper > input");
-
-          if (inputEl) {
-            inputEl.placeholder = "Wpisz tutaj swoje pytanie...";
-          }
-        } catch (err) {
-          console.warn("Nie udało się zmienić placeholdera:", err);
-        }
-      }, 1000);
+      }, 100);
     });
   </script>
 
+  <script>
+    setTimeout(function(){
+      document.querySelector("df-messenger")
+        .shadowRoot.querySelector("df-messenger-chat")
+        .shadowRoot.querySelector("df-messenger-user-input")
+        .shadowRoot.querySelector(".input-box-wrapper > input")
+        .placeholder = "New placeholder text";
+    }, 1000);
+  </script>
+
 </body>
-</html>
