@@ -66,6 +66,10 @@
           const chatBubble = document.createElement('df-messenger-chat-bubble');
           chatBubble.setAttribute('chat-icon', 'https://ebok.pgnig.pl/assets/ico/favicon-36x36.png');+
           chatBubble.setAttribute('chat-title', 'Wirtualna Asystentka PGNiG');
+          const chat = chatBubble.shadowRoot?.querySelector('df-messenger-chat')
+          const userInputContainer = chat?.shadowRoot?.querySelector('df-messenger-user-input')
+          const inputBox = userInputContainer?.shadowRoot?.querySelector('.input-box-wrapper .input-content-wrapper .input-box')
+          if (inputBox) {inputBox.setAttribute('placeholder', 'Tutaj wpisz swoje pytanie')}
           df.appendChild(chatBubble);
         }
       }, 100);
