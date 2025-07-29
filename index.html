@@ -23,6 +23,7 @@
       --df-messenger-message-bot-background: #1B4280;
       --df-messenger-message-bot-font-color: #FFF;
       --df-messenger-send-icon-color: #ff6309;
+
       --df-messenger-card-background: transparent;
       --df-messenger-card-border: none;
       --df-messenger-card-padding: 0;
@@ -42,14 +43,75 @@
     chat-title="Wirtualna Asystentka PGNiG"
     max-query-length="-1"
     chat-icon="https://ebok.pgnig.pl/assets/ico/favicon-36x36.png"
-    url-allowlist="https://ebok.pgnig.pl, https://www.google.com, https://*.googleusercontent.com, https://*.gstatic.com, https://storage.googleapis.com, data:">>
+    url-allowlist="https://ebok.pgnig.pl, https://www.google.com, https://*.googleusercontent.com, https://*.gstatic.com, https://storage.googleapis.com, data:">
   </df-messenger>
 
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       const SESSION_KEY = 'df-welcome-message-shown';
       if (sessionStorage.getItem(SESSION_KEY)) return;
+
       const df = document.querySelector('df-messenger');
+
+      const HERO_SRC = 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/maly-bot.png';
+      const OFFSETS = { x: -8, y: -40 };
+
+      function createOrGetHero() {
+        let hero = document.getElementById('df-hero-overlay');
+        if (!hero) {
+          hero = document.createElement('img');
+          hero.id = 'df-hero-overlay';
+          hero.src = HERO_SRC;
+          hero.alt = '';
+          hero.style.position = 'fixed';
+          hero.style.width = '160px';
+          hero.style.pointerEvents = 'none';
+          hero.style.zIndex = '2147483647';
+          hero.style.display = 'none';
+          document.body.appendChild(hero);
+        }
+        return hero;
+      }
+
+      function placeHero() {
+        const chat = df?.shadowRoot?.querySelector('df-messenger-chat');
+        const sr = chat?.shadowRoot;
+        const msgList =
+          sr?.querySelector('[part="messagelist"]') ||
+          sr?.querySelector('.message-list') || sr;
+
+        const firstBotMsg =
+          msgList?.querySelector('[data-actor="agent"], [data-message-type="bot"], .message--bot, .message');
+
+        const hero = createOrGetHero();
+
+        if (!chat || !firstBotMsg) {
+          hero.style.display = 'none';
+          return;
+        }
+
+        const rect = firstBotMsg.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) {
+          hero.style.display = 'none';
+          return;
+        }
+
+        hero.style.left = `${Math.round(rect.left + OFFSETS.x)}px`;
+        hero.style.top  = `${Math.round(rect.top  + OFFSETS.y)}px`;
+        hero.style.display = 'block';
+      }
+
+      function wireHeroReposition() {
+        const chat = df?.shadowRoot?.querySelector('df-messenger-chat');
+        const sr = chat?.shadowRoot;
+        const msgList =
+          sr?.querySelector('[part="messagelist"]') ||
+          sr?.querySelector('.message-list');
+
+        placeHero();
+        window.addEventListener('resize', placeHero);
+        msgList?.addEventListener('scroll', placeHero, { passive: true });
+      }
 
       const trySetPlaceholder = chatBubble => {
         const chat = chatBubble.shadowRoot?.querySelector('df-messenger-chat');
@@ -67,8 +129,10 @@
           clearInterval(readyChecker);
           sessionStorage.setItem(SESSION_KEY, '1');
 
-          df.renderCustomCard([{type: 'image', rawUrl: 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/maly-bot.png', accessibilityText: 'PGNiG – grafika powitalna'}]);
-          
+          df.renderCustomCard([
+            { type: 'image', rawUrl: 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/maly-bot.png', accessibilityText: 'PGNiG – grafika powitalna' }
+          ]);
+
           df.renderCustomText('Dzień dobry! Jestem Wirtualną Asystentką PGNiG. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo – będzie mi Cię łatwiej zrozumieć.', true);
 
           setTimeout(() => {
@@ -93,7 +157,10 @@
             const pollId = setInterval(() => {
               if (trySetPlaceholder(chatBubble)) clearInterval(pollId);
             }, 150);
+            setTimeout(wireHeroReposition, 400);
           });
+
+          setTimeout(wireHeroReposition, 500);
         }
       }, 100);
     });
