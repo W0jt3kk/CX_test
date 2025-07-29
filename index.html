@@ -62,44 +62,19 @@
         return false;
       };
 
-      /* [DOPISANE] – wyśrodkowanie pierwszego obrazka (karta image) */
-      const centerWelcomeImage = () => {
-        const chat = df?.shadowRoot?.querySelector('df-messenger-chat');
-        const sr = chat?.shadowRoot;
-        if (!sr) return false;
-
-        // pierwszy obrazek w pierwszej wiadomości bota (karta image)
-        const img = sr.querySelector('img');
-        if (!img) return false;
-
-        // centrowanie: na wrapperze i na samym <img>
-        const wrapper = img.parentElement;
-        if (wrapper) {
-          wrapper.style.display = 'flex';
-          wrapper.style.justifyContent = 'center';
-        }
-        img.style.display = 'block';
-        img.style.margin = '0 auto';
-        return true;
-      };
-
       const readyChecker = setInterval(() => {
         if (df && df.renderCustomText && df.renderCustomCard) {
           clearInterval(readyChecker);
           sessionStorage.setItem(SESSION_KEY, '1');
 
-          // obrazek (karta image)
+          /* ZAMIANA: zamiast {type:'image', ...} używamy karty HTML z <img> wyśrodkowanym margin:auto */
           df.renderCustomCard([
-            { type: 'image', rawUrl: 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/maly-bot.png', accessibilityText: 'PGNiG – grafika powitalna' }
+            {
+              type: 'html',
+              html: '<img src="https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/maly-bot.png" alt="" style="display:block;margin:0 auto;width:160px;height:auto;" />'
+            }
           ]);
 
-          // [DOPISANE] – krótki polling aż <img> pojawi się w Shadow DOM, wtedy centrowanie
-          const poll = setInterval(() => {
-            if (centerWelcomeImage()) clearInterval(poll);
-          }, 100);
-          setTimeout(() => clearInterval(poll), 4000);
-
-          // dymek powitalny
           df.renderCustomText('Dzień dobry! Jestem Wirtualną Asystentką PGNiG. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo – będzie mi Cię łatwiej zrozumieć.', true);
 
           setTimeout(() => {
