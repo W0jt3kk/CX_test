@@ -27,7 +27,6 @@
       --df-messenger-card-border: none;
       --df-messenger-card-padding: 0;
       --df-messenger-card-box-shadow: none;
-      --df-messenger-card-spacing: 0;
     }
     df-messenger-chat-bubble {
       --df-messenger-chat-bubble-background: #ffffff;
@@ -43,7 +42,7 @@
     chat-title="Wirtualna Asystentka PGNiG"
     max-query-length="-1"
     chat-icon="https://ebok.pgnig.pl/assets/ico/favicon-36x36.png"
-    url-allowlist="https://ebok.pgnig.pl,https://www.google.com,https://*.googleusercontent.com,https://*.gstatic.com,https://storage.googleapis.com,https://raw.githubusercontent.com,https://*.githubusercontent.com,data:">
+    url-allowlist="https://ebok.pgnig.pl, https://www.google.com, https://*.googleusercontent.com, https://*.gstatic.com, https://storage.googleapis.com, data:">>
   </df-messenger>
 
   <script>
@@ -63,38 +62,14 @@
         return false;
       };
 
-      // NOWE: po wyrenderowaniu obrazka wyśrodkuj go marginesem auto
-      const centerWelcomeImage = () => {
-        const chat = df?.shadowRoot?.querySelector('df-messenger-chat');
-        const img = chat?.shadowRoot?.querySelector('img[src*="maly-bot-2.png"]');
-        if (img) {
-          img.style.display = 'block';
-          img.style.margin = '0 auto';
-          return true;
-        }
-        return false;
-      };
-
       const readyChecker = setInterval(() => {
         if (df && df.renderCustomText && df.renderCustomCard) {
           clearInterval(readyChecker);
           sessionStorage.setItem(SESSION_KEY, '1');
 
-          // ZAMIANA: obraz jako karta "image"
-          df.renderCustomCard([
-            { type: 'image', rawUrl: 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/maly-bot-2.png', accessibilityText: 'PGNiG – grafika powitalna' }
-          ]);
-
-          // Krótki polling, aż <img> pojawi się w Shadow DOM i wtedy wyśrodkuj
-          const pollId = setInterval(() => {
-            if (centerWelcomeImage()) clearInterval(pollId);
-          }, 100);
-
-          // Tekst powitalny jako osobny dymek
-          df.renderCustomText(
-            'Dzień dobry! Jestem Wirtualną Asystentką PGNiG. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo – będzie mi Cię łatwiej zrozumieć.',
-            true
-          );
+          df.renderCustomCard([{type: 'image', rawUrl: 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/maly-bot.png', accessibilityText: 'PGNiG – grafika powitalna'}]);
+          
+          df.renderCustomText('Dzień dobry! Jestem Wirtualną Asystentką PGNiG. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo – będzie mi Cię łatwiej zrozumieć.', true);
 
           setTimeout(() => {
             const chipsPayload = [{
@@ -113,9 +88,10 @@
           df.appendChild(chatBubble);
 
           trySetPlaceholder(chatBubble);
+
           chatBubble.addEventListener('click', () => {
-            const pollPH = setInterval(() => {
-              if (trySetPlaceholder(chatBubble)) clearInterval(pollPH);
+            const pollId = setInterval(() => {
+              if (trySetPlaceholder(chatBubble)) clearInterval(pollId);
             }, 150);
           });
         }
