@@ -42,7 +42,7 @@
     chat-title="Wirtualna Asystentka PGNiG"
     max-query-length="-1"
     chat-icon="https://ebok.pgnig.pl/assets/ico/favicon-36x36.png"
-    url-allowlist="https://ebok.pgnig.pl, https://www.google.com, https://*.googleusercontent.com, https://*.gstatic.com, https://storage.googleapis.com, data:">
+    url-allowlist="https://ebok.pgnig.pl, https://www.google.com, https://*.googleusercontent.com, https://*.gstatic.com, https://storage.googleapis.com, data:">>
   </df-messenger>
 
   <script>
@@ -67,13 +67,8 @@
           clearInterval(readyChecker);
           sessionStorage.setItem(SESSION_KEY, '1');
 
-          df.renderCustomCard([
-            {
-              type: 'html',
-              html: '<div style="position:relative;height:160px;margin-bottom:-46px;pointer-events:none;z-index:2;"><img src="https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/maly-bot.png" alt="" style="position:absolute;left:-8px;bottom:-46px;width:160px;display:block;"/></div>'
-            }
-          ]);
-
+          df.renderCustomCard([{type: 'image', rawUrl: 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/maly-bot.png', accessibilityText: 'PGNiG – grafika powitalna'}]);
+          
           df.renderCustomText('Dzień dobry! Jestem Wirtualną Asystentką PGNiG. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo – będzie mi Cię łatwiej zrozumieć.', true);
 
           setTimeout(() => {
@@ -93,6 +88,7 @@
           df.appendChild(chatBubble);
 
           trySetPlaceholder(chatBubble);
+
           chatBubble.addEventListener('click', () => {
             const pollId = setInterval(() => {
               if (trySetPlaceholder(chatBubble)) clearInterval(pollId);
