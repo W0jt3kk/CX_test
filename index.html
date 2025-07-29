@@ -54,7 +54,9 @@
       const df = document.querySelector('df-messenger');
 
       const HERO_SRC = 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/maly-bot.png';
-      const OFFSETS = { x: -8, y: -40 };
+      const HERO_WIDTH = 160;          // px
+      const OFFSET_X_PCT = -5;         // procent szerokości pierwszego dymka (ujemne = w lewo)
+      const OVERLAP_Y_PCT = 18;        // procent wysokości obrazka, o jaki ma "siąść" na dymek (w dół)
 
       function createOrGetHero() {
         let hero = document.getElementById('df-hero-overlay');
@@ -64,7 +66,7 @@
           hero.src = HERO_SRC;
           hero.alt = '';
           hero.style.position = 'fixed';
-          hero.style.width = '160px';
+          hero.style.width = HERO_WIDTH + 'px';
           hero.style.pointerEvents = 'none';
           hero.style.zIndex = '2147483647';
           hero.style.display = 'none';
@@ -76,12 +78,8 @@
       function placeHero() {
         const chat = df?.shadowRoot?.querySelector('df-messenger-chat');
         const sr = chat?.shadowRoot;
-        const msgList =
-          sr?.querySelector('[part="messagelist"]') ||
-          sr?.querySelector('.message-list') || sr;
-
-        const firstBotMsg =
-          msgList?.querySelector('[data-actor="agent"], [data-message-type="bot"], .message--bot, .message');
+        const msgList = sr?.querySelector('[part="messagelist"]') || sr?.querySelector('.message-list') || sr;
+        const firstBotMsg = msgList?.querySelector('[data-actor="agent"], [data-message-type="bot"], .message--bot, .message');
 
         const hero = createOrGetHero();
 
@@ -90,23 +88,36 @@
           return;
         }
 
+        if (!hero.complete) {
+          hero.addEventListener('load', placeHero, { once: true });
+          return;
+        }
+
         const rect = firstBotMsg.getBoundingClientRect();
-        if (rect.width === 0 || rect.height === 0) {
+        if (!rect || rect.width === 0 || rect.height === 0) {
           hero.style.display = 'none';
           return;
         }
 
-        hero.style.left = `${Math.round(rect.left + OFFSETS.x)}px`;
-        hero.style.top  = `${Math.round(rect.top  + OFFSETS.y)}px`;
+        const naturalW = hero.naturalWidth || HERO_WIDTH;
+        const naturalH = hero.naturalHeight || HERO_WIDTH;
+        const heroHeight = Math.max(1, Math.round(HERO_WIDTH * naturalH / naturalW));
+
+        const offsetX = (OFFSET_X_PCT / 100) * rect.width;
+        const overlapY = (OVERLAP_Y_PCT / 100) * heroHeight;
+
+        const left = Math.round(rect.left + offsetX);
+        const top  = Math.round(rect.top - heroHeight + overlapY);
+
+        hero.style.left = left + 'px';
+        hero.style.top  = top + 'px';
         hero.style.display = 'block';
       }
 
       function wireHeroReposition() {
         const chat = df?.shadowRoot?.querySelector('df-messenger-chat');
         const sr = chat?.shadowRoot;
-        const msgList =
-          sr?.querySelector('[part="messagelist"]') ||
-          sr?.querySelector('.message-list');
+        const msgList = sr?.querySelector('[part="messagelist"]') || sr?.querySelector('.message-list');
 
         placeHero();
         window.addEventListener('resize', placeHero);
