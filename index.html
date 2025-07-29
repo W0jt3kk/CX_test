@@ -62,17 +62,24 @@
         return false;
       };
 
-      // [NOWE] – wyśrodkuj pierwszy obrazek (z powitania) w karcie image
+      /* [DOPISANE] – wyśrodkowanie pierwszego obrazka (karta image) */
       const centerWelcomeImage = () => {
         const chat = df?.shadowRoot?.querySelector('df-messenger-chat');
-        const img = chat?.shadowRoot?.querySelector('img[src*="maly-bot.png"]');
+        const sr = chat?.shadowRoot;
+        if (!sr) return false;
+
+        // pierwszy obrazek w pierwszej wiadomości bota (karta image)
+        const img = sr.querySelector('img');
         if (!img) return false;
+
+        // centrowanie: na wrapperze i na samym <img>
+        const wrapper = img.parentElement;
+        if (wrapper) {
+          wrapper.style.display = 'flex';
+          wrapper.style.justifyContent = 'center';
+        }
         img.style.display = 'block';
         img.style.margin = '0 auto';
-        if (img.parentElement) {
-          img.parentElement.style.display = 'flex';
-          img.parentElement.style.justifyContent = 'center';
-        }
         return true;
       };
 
@@ -81,18 +88,18 @@
           clearInterval(readyChecker);
           sessionStorage.setItem(SESSION_KEY, '1');
 
-          // Obrazek powitalny
+          // obrazek (karta image)
           df.renderCustomCard([
             { type: 'image', rawUrl: 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/maly-bot.png', accessibilityText: 'PGNiG – grafika powitalna' }
           ]);
 
-          // Krótki polling aż obraz pojawi się w Shadow DOM, potem wyśrodkuj
-          const pollId = setInterval(() => {
-            if (centerWelcomeImage()) clearInterval(pollId);
+          // [DOPISANE] – krótki polling aż <img> pojawi się w Shadow DOM, wtedy centrowanie
+          const poll = setInterval(() => {
+            if (centerWelcomeImage()) clearInterval(poll);
           }, 100);
-          setTimeout(() => clearInterval(pollId), 5000);
+          setTimeout(() => clearInterval(poll), 4000);
 
-          // Dymek powitalny
+          // dymek powitalny
           df.renderCustomText('Dzień dobry! Jestem Wirtualną Asystentką PGNiG. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo – będzie mi Cię łatwiej zrozumieć.', true);
 
           setTimeout(() => {
@@ -113,8 +120,8 @@
 
           trySetPlaceholder(chatBubble);
           chatBubble.addEventListener('click', () => {
-            const pollId2 = setInterval(() => {
-              if (trySetPlaceholder(chatBubble)) clearInterval(pollId2);
+            const pollId = setInterval(() => {
+              if (trySetPlaceholder(chatBubble)) clearInterval(pollId);
             }, 150);
           });
         }
