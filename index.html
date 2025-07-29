@@ -63,17 +63,36 @@
         return false;
       };
 
+      // NOWE: po wyrenderowaniu obrazka wyśrodkuj go marginesem auto
+      const centerWelcomeImage = () => {
+        const chat = df?.shadowRoot?.querySelector('df-messenger-chat');
+        const img = chat?.shadowRoot?.querySelector('img[src*="maly-bot-2.png"]');
+        if (img) {
+          img.style.display = 'block';
+          img.style.margin = '0 auto';
+          return true;
+        }
+        return false;
+      };
+
       const readyChecker = setInterval(() => {
         if (df && df.renderCustomText && df.renderCustomCard) {
           clearInterval(readyChecker);
           sessionStorage.setItem(SESSION_KEY, '1');
 
+          // ZAMIANA: obraz jako karta "image"
+          df.renderCustomCard([
+            { type: 'image', rawUrl: 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/maly-bot-2.png', accessibilityText: 'PGNiG – grafika powitalna' }
+          ]);
+
+          // Krótki polling, aż <img> pojawi się w Shadow DOM i wtedy wyśrodkuj
+          const pollId = setInterval(() => {
+            if (centerWelcomeImage()) clearInterval(pollId);
+          }, 100);
+
+          // Tekst powitalny jako osobny dymek
           df.renderCustomText(
-            '<div style="display:flex;justify-content:center;margin:0 0 8px 0;">' +
-              '<img src="https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/maly-bot-2.png" alt="" style="width:160px;height:auto;display:block;" />' +
-            '</div>' +
-            'Dzień dobry! Jestem Wirtualną Asystentką PGNiG. W czym mogę Ci pomóc?\n\n' +
-            'Pamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo – będzie mi Cię łatwiej zrozumieć.',
+            'Dzień dobry! Jestem Wirtualną Asystentką PGNiG. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo – będzie mi Cię łatwiej zrozumieć.',
             true
           );
 
@@ -95,8 +114,8 @@
 
           trySetPlaceholder(chatBubble);
           chatBubble.addEventListener('click', () => {
-            const pollId = setInterval(() => {
-              if (trySetPlaceholder(chatBubble)) clearInterval(pollId);
+            const pollPH = setInterval(() => {
+              if (trySetPlaceholder(chatBubble)) clearInterval(pollPH);
             }, 150);
           });
         }
