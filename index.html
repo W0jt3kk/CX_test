@@ -23,7 +23,6 @@
       --df-messenger-message-bot-background: #1B4280;
       --df-messenger-message-bot-font-color: #FFF;
       --df-messenger-send-icon-color: #ff6309;
-
       --df-messenger-card-background: transparent;
       --df-messenger-card-border: none;
       --df-messenger-card-padding: 0;
@@ -43,7 +42,7 @@
     chat-title="Wirtualna Asystentka PGNiG"
     max-query-length="-1"
     chat-icon="https://ebok.pgnig.pl/assets/ico/favicon-36x36.png"
-    url-allowlist="https://ebok.pgnig.pl, https://www.google.com, https://*.googleusercontent.com, https://*.gstatic.com, https://storage.googleapis.com, https://raw.githubusercontent.com, https://*.githubusercontent.com, data:">
+    url-allowlist="https://ebok.pgnig.pl, https://www.google.com, https://*.googleusercontent.com, https://*.gstatic.com, https://storage.googleapis.com, data:">
   </df-messenger>
 
   <script>
@@ -63,31 +62,59 @@
         return false;
       };
 
+      // NOWE: po renderze – wycentruj obraz względem dymka z powitaniem
+      function centerImageToGreeting() {
+        const chat = df?.shadowRoot?.querySelector('df-messenger-chat');
+        const sr = chat?.shadowRoot;
+        if (!sr) return false;
+
+        // 1) obraz z pierwszej karty (pierwszy <img> w strumieniu bota)
+        const img = sr.querySelector('img');
+        if (!img || !img.complete) return false;
+
+        // 2) dymek z powitaniem – szukamy elementu bota, który zawiera tekst „Dzień dobry!”
+        const botMsgs = Array.from(sr.querySelectorAll('[data-actor="agent"], [data-message-type="bot"], .message'));
+        const greeting = botMsgs.find(el => (el.textContent || '').includes('Dzień dobry!'));
+        if (!greeting) return false;
+
+        // 3) oblicz przesunięcie: wyśrodkuj obraz względem dymka
+        const imgRect = img.getBoundingClientRect();
+        const greetRect = greeting.getBoundingClientRect();
+        if (imgRect.width === 0 || greetRect.width === 0) return false;
+
+        const imgCenter = imgRect.left + imgRect.width / 2;
+        const greetCenter = greetRect.left + greetRect.width / 2;
+        const shift = Math.round(greetCenter - imgCenter);
+
+        // 4) przesuń obraz relatywnie (nie rozwala layoutu)
+        img.style.position = 'relative';
+        img.style.left = `${shift}px`;
+
+        return true;
+      }
+
       const readyChecker = setInterval(() => {
         if (df && df.renderCustomText && df.renderCustomCard) {
           clearInterval(readyChecker);
           sessionStorage.setItem(SESSION_KEY, '1');
 
-          /* 1) Obraz jako karta HTML z centrowaniem */
+          // 1) karta z obrazem (tak jak dotąd)
           df.renderCustomCard([
-            {
-              type: 'html',
-              html:
-                '<div style="text-align:center;margin:0 0 6px 0;">' +
-                  '<img src="https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/maly-bot.png" alt="" ' +
-                  'style="display:block;margin:0 auto;width:160px;height:auto;" />' +
-                '</div>'
-            }
+            { type: 'image', rawUrl: 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/maly-bot.png', accessibilityText: 'PGNiG – grafika powitalna' }
           ]);
 
-          /* 2) Dymek powitalny */
-          df.renderCustomText(
-            'Dzień dobry! Jestem Wirtualną Asystentką PGNiG. W czym mogę Ci pomóc?\n\n' +
-            'Pamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo – będzie mi Cię łatwiej zrozumieć.',
-            true
-          );
+          // 2) dymek powitalny (tak jak dotąd)
+          df.renderCustomText('Dzień dobry! Jestem Wirtualną Asystentką PGNiG. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo – będzie mi Cię łatwiej zrozumieć.', true);
 
-          /* 3) Chipsy */
+          // 3) po renderze spróbuj kilka razy wycentrować
+          let tries = 0;
+          const maxTries = 30; // ~3s
+          const pollCenter = setInterval(() => {
+            tries++;
+            if (centerImageToGreeting() || tries >= maxTries) clearInterval(pollCenter);
+          }, 100);
+
+          // chipsy – bez zmian
           setTimeout(() => {
             const chipsPayload = [{
               type: 'chips',
@@ -99,7 +126,7 @@
             df.renderCustomCard(chipsPayload);
           }, 1500);
 
-          /* 4) Bubble + placeholder */
+          // bubble + placeholder – bez zmian
           const chatBubble = document.createElement('df-messenger-chat-bubble');
           chatBubble.setAttribute('chat-icon', 'https://ebok.pgnig.pl/assets/ico/favicon-36x36.png');
           chatBubble.setAttribute('chat-title', 'Wirtualna Asystentka PGNiG');
