@@ -12,6 +12,7 @@
       position: absolute;
       bottom: 16px;
       right: 16px;
+
       --df-messenger-titlebar-title-font-size: 16px;
       --df-messenger-font-color: #000;
       --df-messenger-font-family: Google Sans;
@@ -36,6 +37,7 @@
   </style>
 </head>
 <body>
+
   <df-messenger
     project-id="wirtualna-asystentka-cx"
     agent-id="971672d5-f388-4c83-bc51-97e8945c8ad6"
@@ -43,20 +45,19 @@
     chat-title="Wirtualna Asystentka PGNiG"
     max-query-length="-1"
     chat-icon="https://ebok.pgnig.pl/assets/ico/favicon-36x36.png"
-    url-allowlist="https://ebok.pgnig.pl, https://www.google.com, https://*.googleusercontent.com, https://*.gstatic.com, https://storage.googleapis.com, data:">
+    url-allowlist="https://ebok.pgnig.pl,https://www.google.com,https://*.googleusercontent.com,https://*.gstatic.com,https://storage.googleapis.com,data:">
   </df-messenger>
 
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       const SESSION_KEY = 'df-welcome-message-shown';
-      if (sessionStorage.getItem(SESSION_KEY)) return;
-
       const df = document.querySelector('df-messenger');
 
       const HERO_SRC = 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/maly-bot.png';
-      const HERO_WIDTH = 160;          // px
-      const OFFSET_X_PCT = -5;         // procent szerokości pierwszego dymka (ujemne = w lewo)
-      const OVERLAP_Y_PCT = 18;        // procent wysokości obrazka, o jaki ma "siąść" na dymek (w dół)
+      const HERO_WIDTH_PX = 160;
+      const OFFSET_X_PCT = -5;   // przesunięcie w poziomie względem szerokości dymka (ujemne = w lewo)
+      const OVERLAP_Y_PCT = 18;  // o ile % wysokości obrazka ma „usiąść” na dymek (w dół)
+      let heroWired = false;
 
       function createOrGetHero() {
         let hero = document.getElementById('df-hero-overlay');
@@ -66,7 +67,7 @@
           hero.src = HERO_SRC;
           hero.alt = '';
           hero.style.position = 'fixed';
-          hero.style.width = HERO_WIDTH + 'px';
+          hero.style.width = HERO_WIDTH_PX + 'px';
           hero.style.pointerEvents = 'none';
           hero.style.zIndex = '2147483647';
           hero.style.display = 'none';
@@ -75,15 +76,36 @@
         return hero;
       }
 
-      function placeHero() {
+      function getChatAndList() {
         const chat = df?.shadowRoot?.querySelector('df-messenger-chat');
         const sr = chat?.shadowRoot;
-        const msgList = sr?.querySelector('[part="messagelist"]') || sr?.querySelector('.message-list') || sr;
-        const firstBotMsg = msgList?.querySelector('[data-actor="agent"], [data-message-type="bot"], .message--bot, .message');
+        const msgList =
+          sr?.querySelector('[part="messagelist"]') ||
+          sr?.querySelector('.message-list') || sr;
+        return { chat, sr, msgList };
+      }
 
+      function findFirstBotMessage(msgList) {
+        return (
+          msgList?.querySelector('[data-actor="agent"]') ||
+          msgList?.querySelector('[data-message-type="bot"]') ||
+          msgList?.querySelector('.message--bot') ||
+          msgList?.querySelector('.message') ||
+          null
+        );
+      }
+
+      function placeHero() {
+        const { chat, msgList } = getChatAndList();
         const hero = createOrGetHero();
 
-        if (!chat || !firstBotMsg) {
+        if (!chat || !msgList) {
+          hero.style.display = 'none';
+          return;
+        }
+
+        const firstBotMsg = findFirstBotMessage(msgList);
+        if (!firstBotMsg) {
           hero.style.display = 'none';
           return;
         }
@@ -99,9 +121,9 @@
           return;
         }
 
-        const naturalW = hero.naturalWidth || HERO_WIDTH;
-        const naturalH = hero.naturalHeight || HERO_WIDTH;
-        const heroHeight = Math.max(1, Math.round(HERO_WIDTH * naturalH / naturalW));
+        const naturalW = hero.naturalWidth || HERO_WIDTH_PX;
+        const naturalH = hero.naturalHeight || HERO_WIDTH_PX;
+        const heroHeight = Math.max(1, Math.round(HERO_WIDTH_PX * naturalH / naturalW));
 
         const offsetX = (OFFSET_X_PCT / 100) * rect.width;
         const overlapY = (OVERLAP_Y_PCT / 100) * heroHeight;
@@ -115,63 +137,76 @@
       }
 
       function wireHeroReposition() {
-        const chat = df?.shadowRoot?.querySelector('df-messenger-chat');
-        const sr = chat?.shadowRoot;
-        const msgList = sr?.querySelector('[part="messagelist"]') || sr?.querySelector('.message-list');
-
+        if (heroWired) { placeHero(); return; }
+        const { msgList } = getChatAndList();
         placeHero();
         window.addEventListener('resize', placeHero);
         msgList?.addEventListener('scroll', placeHero, { passive: true });
+        if (msgList) {
+          const mo = new MutationObserver(placeHero);
+          mo.observe(msgList, { childList: true, subtree: true });
+        }
+        heroWired = true;
       }
 
-      const trySetPlaceholder = chatBubble => {
-        const chat = chatBubble.shadowRoot?.querySelector('df-messenger-chat');
-        const userInputContainer = chat?.shadowRoot?.querySelector('df-messenger-user-input');
-        const inputBox = userInputContainer?.shadowRoot?.querySelector('.input-box-wrapper .input-content-wrapper .input-box');
-        if (inputBox) {
-          inputBox.setAttribute('placeholder', 'Tutaj wpisz swoje pytanie');
-          return true;
+      function ensureChatBubbleAndPlaceholder() {
+        let chatBubble = df.querySelector('df-messenger-chat-bubble');
+        if (!chatBubble) {
+          chatBubble = document.createElement('df-messenger-chat-bubble');
+          chatBubble.setAttribute('chat-icon', 'https://ebok.pgnig.pl/assets/ico/favicon-36x36.png');
+          chatBubble.setAttribute('chat-title', 'Wirtualna Asystentka PGNiG');
+          df.appendChild(chatBubble);
         }
-        return false;
-      };
+
+        const trySetPlaceholder = () => {
+          const chat = chatBubble.shadowRoot?.querySelector('df-messenger-chat');
+          const userInputContainer = chat?.shadowRoot?.querySelector('df-messenger-user-input');
+          const inputBox = userInputContainer?.shadowRoot?.querySelector('.input-box-wrapper .input-content-wrapper .input-box');
+          if (inputBox) {
+            inputBox.setAttribute('placeholder', 'Tutaj wpisz swoje pytanie');
+            return true;
+          }
+          return false;
+        };
+
+        trySetPlaceholder();
+        if (!chatBubble.dataset.phListener) {
+          chatBubble.addEventListener('click', () => {
+            const pollId = setInterval(() => {
+              if (trySetPlaceholder()) clearInterval(pollId);
+            }, 150);
+            setTimeout(wireHeroReposition, 400);
+          });
+          chatBubble.dataset.phListener = '1';
+        }
+      }
 
       const readyChecker = setInterval(() => {
         if (df && df.renderCustomText && df.renderCustomCard) {
           clearInterval(readyChecker);
-          sessionStorage.setItem(SESSION_KEY, '1');
 
-          df.renderCustomCard([
-            { type: 'image', rawUrl: 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/maly-bot.png', accessibilityText: 'PGNiG – grafika powitalna' }
-          ]);
+          if (!sessionStorage.getItem(SESSION_KEY)) {
+            df.renderCustomCard([
+              { type: 'image', rawUrl: 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/maly-bot.png', accessibilityText: 'PGNiG – grafika powitalna' }
+            ]);
+            df.renderCustomText('Dzień dobry! Jestem Wirtualną Asystentką PGNiG. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo – będzie mi Cię łatwiej zrozumieć.', true);
 
-          df.renderCustomText('Dzień dobry! Jestem Wirtualną Asystentką PGNiG. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo – będzie mi Cię łatwiej zrozumieć.', true);
+            setTimeout(() => {
+              const chipsPayload = [{
+                type: 'chips',
+                options: [
+                  { text: 'Najczęstsze pytania' },
+                  { text: 'Regulamin usługi / Polityka prywatności' }
+                ]
+              }];
+              df.renderCustomCard(chipsPayload);
+            }, 1500);
 
-          setTimeout(() => {
-            const chipsPayload = [{
-              type: 'chips',
-              options: [
-                { text: 'Najczęstsze pytania' },
-                { text: 'Regulamin usługi / Polityka prywatności' }
-              ]
-            }];
-            df.renderCustomCard(chipsPayload);
-          }, 1500);
+            sessionStorage.setItem(SESSION_KEY, '1');
+          }
 
-          const chatBubble = document.createElement('df-messenger-chat-bubble');
-          chatBubble.setAttribute('chat-icon', 'https://ebok.pgnig.pl/assets/ico/favicon-36x36.png');
-          chatBubble.setAttribute('chat-title', 'Wirtualna Asystentka PGNiG');
-          df.appendChild(chatBubble);
-
-          trySetPlaceholder(chatBubble);
-
-          chatBubble.addEventListener('click', () => {
-            const pollId = setInterval(() => {
-              if (trySetPlaceholder(chatBubble)) clearInterval(pollId);
-            }, 150);
-            setTimeout(wireHeroReposition, 400);
-          });
-
-          setTimeout(wireHeroReposition, 500);
+          ensureChatBubbleAndPlaceholder();
+          setTimeout(wireHeroReposition, 600);
         }
       }, 100);
     });
