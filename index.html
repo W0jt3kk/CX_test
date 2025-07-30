@@ -12,23 +12,17 @@
       position: absolute;
       bottom: 16px;
       right: 16px;
-
       --df-messenger-titlebar-title-font-size: 16px;
       --df-messenger-font-color: #000;
       --df-messenger-font-family: Google Sans;
-
-      /* elastyczne okno czatu – lepsze na małych ekranach */
-      --df-messenger-chat-window-width: min(92vw, 480px);
-      --df-messenger-chat-window-height: min(80vh, 720px);
-
       --df-messenger-chat-background: #f3f6fc;
+      --df-messenger-chat-window-height: 75vh;
+      --df-messenger-chat-window-width: 50vh;
       --df-messenger-message-user-background: #ff6309;
       --df-messenger-message-user-font-color: #FFF;
       --df-messenger-message-bot-background: #1B4280;
       --df-messenger-message-bot-font-color: #FFF;
       --df-messenger-send-icon-color: #ff6309;
-
-      /* bez tła/ramek dla kart, żeby PNG z przezroczystością wyglądał dobrze */
       --df-messenger-card-background: transparent;
       --df-messenger-card-border: none;
       --df-messenger-card-padding: 0;
@@ -55,7 +49,6 @@
     window.addEventListener('DOMContentLoaded', () => {
       const SESSION_KEY = 'df-welcome-message-shown';
       if (sessionStorage.getItem(SESSION_KEY)) return;
-
       const df = document.querySelector('df-messenger');
 
       const trySetPlaceholder = chatBubble => {
@@ -74,14 +67,22 @@
           clearInterval(readyChecker);
           sessionStorage.setItem(SESSION_KEY, '1');
 
-          /* 1) Najpierw dymek powitalny */
-          df.renderCustomText(
-            'Dzień dobry! Jestem Wirtualną Asystentką PGNiG. W czym mogę Ci pomóc?\n\n' +
-            'Pamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo – będzie mi Cię łatwiej zrozumieć.',
-            true
-          );
+          // 1) Obrazek jako pierwsza karta – HTML z centrowaniem i responsywną szerokością
+          df.renderCustomCard([
+            {
+              type: 'html',
+              html:
+                '<div style="text-align:center;margin:0 0 8px 0;">' +
+                  '<img src="https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/maly-bot-2.png" alt="" ' +
+                  'style="display:block;margin:0 auto;height:auto;width:clamp(120px,70%,280px);" />' +
+                '</div>'
+            }
+          ]);
 
-          /* 2) Potem chipsy (opcjonalnie) */
+          // 2) Dymek powitalny
+          df.renderCustomText('Dzień dobry! Jestem Wirtualną Asystentką PGNiG. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo – będzie mi Cię łatwiej zrozumieć.', true);
+
+          // 3) Chipsy
           setTimeout(() => {
             const chipsPayload = [{
               type: 'chips',
@@ -91,24 +92,9 @@
               ]
             }];
             df.renderCustomCard(chipsPayload);
-          }, 500);
+          }, 1500);
 
-          /* 3) Na końcu – obraz jako karta HTML, więc po auto-scrollu będzie widoczny
-                i skaluje się responsywnie (clamp) + centrowanie */
-          setTimeout(() => {
-            df.renderCustomCard([
-              {
-                type: 'html',
-                html:
-                  '<div style="text-align:center; margin-top:8px;">' +
-                    '<img src="https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/maly-bot-2.png" alt="" ' +
-                    'style="display:block; margin:0 auto; height:auto; width:clamp(120px, 70vw, 280px);" />' +
-                  '</div>'
-              }
-            ]);
-          }, 900);
-
-          /* 4) Bubble + placeholder */
+          // 4) Bubble + placeholder
           const chatBubble = document.createElement('df-messenger-chat-bubble');
           chatBubble.setAttribute('chat-icon', 'https://ebok.pgnig.pl/assets/ico/favicon-36x36.png');
           chatBubble.setAttribute('chat-title', 'Wirtualna Asystentka PGNiG');
