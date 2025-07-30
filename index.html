@@ -42,7 +42,7 @@
     chat-title="Wirtualna Asystentka PGNiG"
     max-query-length="-1"
     chat-icon="https://ebok.pgnig.pl/assets/ico/favicon-36x36.png"
-    url-allowlist="https://ebok.pgnig.pl, https://www.google.com, https://*.googleusercontent.com, https://*.gstatic.com, https://storage.googleapis.com, data:">
+    url-allowlist="https://ebok.pgnig.pl, https://www.google.com, https://*.googleusercontent.com, https://*.gstatic.com, https://storage.googleapis.com, data:">>
   </df-messenger>
 
   <script>
@@ -62,57 +62,15 @@
         return false;
       };
 
-      // NOWE: wycentrowanie + responsywność obrazka i przezroczyste tło TYLKO dla tej wiadomości
-      const styleWelcomeImageOnce = () => {
-        const chat = df?.shadowRoot?.querySelector('df-messenger-chat');
-        const sr = chat?.shadowRoot;
-        if (!sr) return false;
-
-        // znajdź pierwszy obrazek z karty (możesz doprecyzować selektor po nazwie pliku)
-        const img = sr.querySelector('img[src*="maly-bot-2.png"], img[src*="maly-bot.png"]');
-        if (!img) return false;
-
-        // centrowanie i responsywna szerokość
-        img.style.display = 'block';
-        img.style.margin = '0 auto';
-        img.style.height = 'auto';
-        img.style.marginTop = '-4px';
-        img.style.maxWidth = '100%';
-        img.style.width = 'clamp(100px, 60%, 260px)';
-
-        // uczyń TYLKO ten dymek bota przezroczystym (lokalne nadpisanie zmiennej)
-        const messageEl =
-          img.closest('[data-actor="agent"]') ||
-          img.closest('[data-message-type="bot"]') ||
-          img.closest('.message');
-        if (messageEl) {
-          messageEl.style.setProperty('--df-messenger-message-bot-background', 'transparent');
-          messageEl.style.setProperty('--df-messenger-message-bot-border', 'none');
-        }
-        return true;
-      };
-
       const readyChecker = setInterval(() => {
         if (df && df.renderCustomText && df.renderCustomCard) {
           clearInterval(readyChecker);
           sessionStorage.setItem(SESSION_KEY, '1');
 
-          // 1) Obrazek jako pierwsza karta
-          df.renderCustomCard([
-            { type: 'image', rawUrl: 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/maly-bot-2.png', accessibilityText: 'PGNiG – grafika powitalna' }
-          ]);
-
-          // krótki polling aż obraz pojawi się w Shadow DOM, wtedy stylowanie
-          let tries = 0;
-          const poll = setInterval(() => {
-            tries++;
-            if (styleWelcomeImageOnce() || tries > 40) clearInterval(poll);
-          }, 75);
-
-          // 2) Dymek powitalny
+          df.renderCustomCard([{type: 'image', rawUrl: 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/maly-bot-2.png', accessibilityText: 'PGNiG – grafika powitalna'}]);
+          
           df.renderCustomText('Dzień dobry! Jestem Wirtualną Asystentką PGNiG. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo – będzie mi Cię łatwiej zrozumieć.', true);
 
-          // 3) Chipsy
           setTimeout(() => {
             const chipsPayload = [{
               type: 'chips',
@@ -124,13 +82,13 @@
             df.renderCustomCard(chipsPayload);
           }, 1500);
 
-          // 4) Bubble + placeholder
           const chatBubble = document.createElement('df-messenger-chat-bubble');
           chatBubble.setAttribute('chat-icon', 'https://ebok.pgnig.pl/assets/ico/favicon-36x36.png');
           chatBubble.setAttribute('chat-title', 'Wirtualna Asystentka PGNiG');
           df.appendChild(chatBubble);
 
           trySetPlaceholder(chatBubble);
+
           chatBubble.addEventListener('click', () => {
             const pollId = setInterval(() => {
               if (trySetPlaceholder(chatBubble)) clearInterval(pollId);
