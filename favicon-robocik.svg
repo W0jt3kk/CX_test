@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Warstwa_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 36 36">
+  <!-- Generator: Adobe Illustrator 29.8.1, SVG Export Plug-In . SVG Version: 2.1.1 Build 2)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+        stroke: #d81e04;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.5px;
+      }
+    </style>
+  </defs>
+  <path class="st0" d="M25.74,31.05h-15.87c-3.33,0-6.06-2.73-6.06-6.06v-8.86c0-3.33,2.73-6.06,6.06-6.06h15.87c3.33,0,6.06,2.73,6.06,6.06v8.86c0,3.33-2.73,6.06-6.06,6.06h0ZM26.24,17.59c0,1.59-1.29,2.87-2.87,2.87s-2.87-1.29-2.87-2.87,1.29-2.87,2.87-2.87,2.87,1.29,2.87,2.87h0ZM15.12,17.59c0,1.59-1.29,2.87-2.87,2.87s-2.87-1.29-2.87-2.87,1.29-2.87,2.87-2.87,2.87,1.29,2.87,2.87h0ZM21.42,24.69h0c-.42,1.11-1.49,1.84-2.67,1.84h-1.89c-1.19,0-2.25-.73-2.67-1.84h0"/>
+  <rect class="st0" x="1" y="17.01" width="2.81" height="5.81"/>
+  <rect class="st0" x="32.19" y="17.01" width="2.81" height="5.81"/>
+  <circle class="st0" cx="17.81" cy="4.69" r="1.74"/>
+  <line class="st0" x1="17.81" y1="9.79" x2="17.81" y2="6.69"/>
+</svg>
