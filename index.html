@@ -92,12 +92,38 @@
           chatBubble.setAttribute('chat-title', 'Wirtualna Asystentka eBOK');
           df.appendChild(chatBubble);
 
-          trySetPlaceholder(chatBubble);
+          let welcomeAccepted = false;
 
-          chatBubble.addEventListener('click', () => {
+          const updateInput = () => {
+            const chat = chatBubble.shadowRoot?.querySelector('df-messenger-chat');
+            const userInput = chat?.shadowRoot?.querySelector('df-messenger-user-input');
+
+            if (!userInput) return false;
+
+            userInput.style.display = welcomeAccepted ? '' : 'none';
+            trySetPlaceholder(chatBubble);
+            return true;
+          };
+
+          const waitForInput = () => {
+            let attempts = 0;
             const pollId = setInterval(() => {
-              if (trySetPlaceholder(chatBubble)) clearInterval(pollId);
+              attempts++;
+              if (updateInput() || attempts >= 40) {
+                clearInterval(pollId);
+              }
             }, 150);
+          };
+
+          waitForInput();
+
+          chatBubble.addEventListener('click', waitForInput);
+
+          window.addEventListener('df-chip-clicked', (event) => {
+            if (event.detail?.text !== 'Rozumiem, zaczynajmy!') return;
+
+            welcomeAccepted = true;
+            updateInput();
           });
         }
       }, 100);
