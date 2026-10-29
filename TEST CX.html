@@ -113,6 +113,26 @@
               ) {
                 node.setAttribute('data-ebok-welcome-button', '');
 
+                // Wyrównanie do prawej przez kontener przycisku
+                const buttonContainer = node.parentElement;
+
+                if (buttonContainer) {
+                  buttonContainer.style.setProperty('display', 'flex', 'important');
+                  buttonContainer.style.setProperty('justify-content', 'flex-end', 'important');
+                  buttonContainer.style.setProperty('width', '100%', 'important');
+                  buttonContainer.style.setProperty('box-sizing', 'border-box', 'important');
+                }
+
+                // Identyfikacja ikony Material Icons
+                const iconNode = Array.from(node.querySelectorAll('*')).find(
+                  el => el.children.length === 0 &&
+                        el.textContent?.trim() === 'rocket_launch'
+                );
+
+                if (iconNode) {
+                  iconNode.setAttribute('data-ebok-welcome-icon', '');
+                }
+
                 const styleRoot = node.getRootNode();
                 const customStyle = document.createElement('style');
 
@@ -136,13 +156,12 @@
                     filter: none !important;
                   }
 
-                  /* Wyłączenie domyślnych nakładek */
                   [data-ebok-welcome-button]::before,
                   [data-ebok-welcome-button]::after {
                     content: none !important;
                   }
 
-                  /* Biały tekst w stanie normalnym */
+                  /* Tekst biały w stanie normalnym */
                   [data-ebok-welcome-button] *,
                   [data-ebok-welcome-button] *::before,
                   [data-ebok-welcome-button] *::after {
@@ -153,7 +172,7 @@
                                 fill 300ms ease !important;
                   }
 
-                  /* Czarny tekst podczas hovera */
+                  /* Tekst czarny podczas hovera */
                   [data-ebok-welcome-button]:hover *,
                   [data-ebok-welcome-button]:hover *::before,
                   [data-ebok-welcome-button]:hover *::after {
@@ -162,17 +181,23 @@
                     filter: none !important;
                   }
 
-                  /* Rakieta: biała normalnie */
+                  /* Rakieta jako SVG */
                   [data-ebok-welcome-button] svg,
                   [data-ebok-welcome-button] svg * {
                     fill: #ffffff !important;
                     color: #ffffff !important;
                   }
 
-                  /* Rakieta: czerwona na hoverze */
                   [data-ebok-welcome-button]:hover svg,
                   [data-ebok-welcome-button]:hover svg * {
                     fill: #d81e04 !important;
+                    color: #d81e04 !important;
+                  }
+
+                  /* Rakieta jako Material Icons */
+                  [data-ebok-welcome-button]:hover [data-ebok-welcome-icon],
+                  [data-ebok-welcome-button]:hover .material-icons,
+                  [data-ebok-welcome-button]:hover .material-symbols-outlined {
                     color: #d81e04 !important;
                   }
                 `;
@@ -189,7 +214,6 @@
 
             return false;
           };
-
           let styleAttempts = 0;
           const buttonStylePoll = setInterval(() => {
             styleAttempts++;
