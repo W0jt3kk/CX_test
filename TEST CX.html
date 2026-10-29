@@ -110,41 +110,51 @@
                 node.matches?.('button, [role="button"], a, .button') &&
                 node.textContent?.includes('Rozumiem, zaczynajmy!')
               ) {
-                const setButtonStyle = (hovered) => {
-                  node.style.setProperty(
-                    'background-color',
-                    '#ffffff',
-                    'important'
-                  );
+                // Oznaczenie tylko naszego przycisku
+                node.setAttribute('data-ebok-welcome-button', '');
 
-                  node.style.setProperty(
-                    'box-shadow',
-                    hovered
-                      ? 'inset 0 0 0 100px rgba(216, 30, 4, 0.12)'
-                      : 'inset 0 0 0 100px rgba(216, 30, 4, 0)',
-                    'important'
-                  );
+                const styleRoot = node.getRootNode();
+                const customStyle = document.createElement('style');
 
-                  node.style.setProperty('color', '#1f1f1f', 'important');
-                  node.style.setProperty('border', '1px solid #d81e04', 'important');
-                  node.style.setProperty('opacity', '1', 'important');
-                };
+                customStyle.textContent = `
+                  [data-ebok-welcome-button] {
+                    background-color: #ffffff !important;
+                    color: #000000 !important;
+                    border: 1px solid #d81e04 !important;
+                    box-shadow: none !important;
+                    opacity: 1 !important;
+                    filter: none !important;
+                    transition: background-color 300ms ease !important;
+                  }
 
-                node.style.setProperty(
-                  'transition',
-                  'box-shadow 300ms ease, background-color 300ms ease',
-                  'important'
-                );
+                  [data-ebok-welcome-button]:hover {
+                    background-color: #fbe5e2 !important;
+                    color: #000000 !important;
+                    opacity: 1 !important;
+                    filter: none !important;
+                  }
 
-                setButtonStyle(false);
+                  /* Wyłączenie potencjalnych nakładek hover */
+                  [data-ebok-welcome-button]::before,
+                  [data-ebok-welcome-button]::after {
+                    content: none !important;
+                  }
 
-                node.addEventListener('mouseenter', () => {
-                  setButtonStyle(true);
-                });
+                  /* Tekst i ikona pozostają nieprzezroczyste */
+                  [data-ebok-welcome-button] *,
+                  [data-ebok-welcome-button]:hover * {
+                    opacity: 1 !important;
+                    filter: none !important;
+                    color: #000000 !important;
+                  }
 
-                node.addEventListener('mouseleave', () => {
-                  setButtonStyle(false);
-                });
+                  [data-ebok-welcome-button] svg,
+                  [data-ebok-welcome-button] svg * {
+                    fill: #000000 !important;
+                  }
+                `;
+
+                styleRoot.appendChild(customStyle);
 
                 return true;
               }
@@ -155,8 +165,7 @@
             }
 
             return false;
-          };
-          let styleAttempts = 0;
+          };          let styleAttempts = 0;
 
           const buttonStylePoll = setInterval(() => {
             styleAttempts++;
