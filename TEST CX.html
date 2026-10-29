@@ -17,7 +17,7 @@
       --df-messenger-font-family: Google Sans;
       --df-messenger-chat-background: #f3f6fc;
       --df-messenger-chat-window-height: 75vh;
-      --df-messenger-chat-window-width: 25vw;
+      --df-messenger-chat-window-width: 35vw;
       --df-messenger-message-user-background: #d81e04;
       --df-messenger-message-user-font-color: #FFF;
       --df-messenger-message-bot-background: #ffffff;
@@ -75,29 +75,85 @@
             true
           );
 
-          const chipsPayload = [{
-            type: 'chips',
-            options: [
-              {
-                text: 'Rozumiem, zaczynajmy!',
-                mode: 'blocking'
-              }
-            ]
+          const buttonPayload = [{
+            type: 'button',
+            text: 'Rozumiem, zaczynajmy!',
+            mode: 'blocking',
+            event: {
+              event: 'welcome_accepted'
+            },
+            icon: {
+              type: 'rocket_launch',
+              color: '#d81e04'
+            }
           }];
 
-          df.renderCustomCard(chipsPayload);
+          df.renderCustomCard(buttonPayload);
 
           const chatBubble = document.createElement('df-messenger-chat-bubble');
           chatBubble.setAttribute('chat-icon', 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/favicon.png');
           chatBubble.setAttribute('chat-title', 'Wirtualna Asystentka eBOK');
           df.appendChild(chatBubble);
 
-          trySetPlaceholder(chatBubble);
+          let welcomeAccepted = false;
 
-          chatBubble.addEventListener('click', () => {
+          const updateInput = () => {
+            const chat = chatBubble.shadowRoot?.querySelector('df-messenger-chat');
+            const userInput = chat?.shadowRoot?.querySelector('df-messenger-user-input');
+
+            if (!userInput) return false;
+
+            // Input pozostaje widoczny, ale jest nieaktywny do akceptacji
+            userInput.style.display = '';
+            userInput.style.pointerEvents = welcomeAccepted ? '' : 'none';
+            userInput.style.opacity = welcomeAccepted ? '1' : '0.65';
+
+            // Delikatne ukośne kreskowanie nieaktywnego inputu
+            userInput.style.setProperty(
+              '--df-messenger-input-background',
+              welcomeAccepted
+                ? '#ffffff'
+                : 'repeating-linear-gradient(135deg, #f4f4f4 0px, #f4f4f4 3px, #dedede 3px, #dedede 4px)'
+            );
+
+            trySetPlaceholder(chatBubble);
+
+            // Placeholder zależny od etapu rozmowy
+            const inputBox = userInput.shadowRoot?.querySelector(
+              '.input-box-wrapper .input-content-wrapper .input-box'
+            );
+
+            if (inputBox) {
+              inputBox.setAttribute(
+                'placeholder',
+                welcomeAccepted
+                  ? 'Tutaj wpisz swoje pytanie'
+                  : 'Najpierw kliknij „Rozumiem, zaczynajmy!”'
+              );
+            }
+
+            return true;
+          };
+
+          const waitForInput = () => {
+            let attempts = 0;
             const pollId = setInterval(() => {
-              if (trySetPlaceholder(chatBubble)) clearInterval(pollId);
+              attempts++;
+              if (updateInput() || attempts >= 40) {
+                clearInterval(pollId);
+              }
             }, 150);
+          };
+
+          waitForInput();
+
+          chatBubble.addEventListener('click', waitForInput);
+
+          window.addEventListener('df-button-clicked', (event) => {
+            if (event.detail?.text !== 'Rozumiem, zaczynajmy!') return;
+
+            welcomeAccepted = true;
+            updateInput();
           });
         }
       }, 100);
@@ -105,4 +161,3 @@
   </script>
 </body>
 </html>
-
