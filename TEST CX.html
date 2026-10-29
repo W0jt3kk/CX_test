@@ -113,17 +113,26 @@
                 const setButtonStyle = (hovered) => {
                   node.style.setProperty(
                     'background-color',
-                    hovered ? '#f5b8ad' : '#fde8e5',
+                    '#ffffff',
                     'important'
                   );
-                  node.style.setProperty('color', '#8c2116', 'important');
+
+                  node.style.setProperty(
+                    'box-shadow',
+                    hovered
+                      ? 'inset 0 0 0 100px rgba(216, 30, 4, 0.12)'
+                      : 'inset 0 0 0 100px rgba(216, 30, 4, 0)',
+                    'important'
+                  );
+
+                  node.style.setProperty('color', '#1f1f1f', 'important');
                   node.style.setProperty('border', '1px solid #d81e04', 'important');
                   node.style.setProperty('opacity', '1', 'important');
                 };
 
                 node.style.setProperty(
                   'transition',
-                  'background-color 180ms ease',
+                  'box-shadow 300ms ease, background-color 300ms ease',
                   'important'
                 );
 
@@ -147,7 +156,6 @@
 
             return false;
           };
-
           let styleAttempts = 0;
 
           const buttonStylePoll = setInterval(() => {
