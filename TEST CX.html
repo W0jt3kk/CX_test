@@ -140,7 +140,7 @@
                     content: none !important;
                   }
 
-                  /* Tekst i ikona pozostają nieprzezroczyste */
+                  /* Tekst pozostaje czarny i nieprzezroczysty */
                   [data-ebok-welcome-button] *,
                   [data-ebok-welcome-button]:hover * {
                     opacity: 1 !important;
@@ -148,9 +148,13 @@
                     color: #000000 !important;
                   }
 
+                  /* Rakieta pozostaje czerwona również na hoverze */
                   [data-ebok-welcome-button] svg,
-                  [data-ebok-welcome-button] svg * {
-                    fill: #000000 !important;
+                  [data-ebok-welcome-button] svg *,
+                  [data-ebok-welcome-button]:hover svg,
+                  [data-ebok-welcome-button]:hover svg * {
+                    fill: #d81e04 !important;
+                    color: #d81e04 !important;
                   }
                 `;
 
