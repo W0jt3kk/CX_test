@@ -84,7 +84,7 @@
             },
             icon: {
               type: 'rocket_launch',
-              color: '#d81e04'
+              color: '#ffffff'
             }
           }];
 
@@ -95,6 +95,7 @@
           chatBubble.setAttribute('chat-title', 'Wirtualna Asystentka eBOK');
           df.appendChild(chatBubble);
 
+          // Stylowanie wyłącznie przycisku powitalnego
           // Stylowanie wyłącznie przycisku powitalnego
           const styleWelcomeButton = (root) => {
             const stack = [root];
@@ -110,7 +111,6 @@
                 node.matches?.('button, [role="button"], a, .button') &&
                 node.textContent?.includes('Rozumiem, zaczynajmy!')
               ) {
-                // Oznaczenie tylko naszego przycisku
                 node.setAttribute('data-ebok-welcome-button', '');
 
                 const styleRoot = node.getRootNode();
@@ -118,39 +118,58 @@
 
                 customStyle.textContent = `
                   [data-ebok-welcome-button] {
-                    background-color: #ffffff !important;
-                    color: #000000 !important;
-                    border: 1px solid #d81e04 !important;
+                    background-color: #d81e04 !important;
+                    color: #ffffff !important;
+                    border: 2px solid #d81e04 !important;
+                    box-sizing: border-box !important;
                     box-shadow: none !important;
                     opacity: 1 !important;
                     filter: none !important;
-                    transition: background-color 300ms ease !important;
+                    transition: background-color 300ms ease,
+                                color 300ms ease !important;
                   }
 
                   [data-ebok-welcome-button]:hover {
-                    background-color: #fbe5e2 !important;
+                    background-color: #ffffff !important;
                     color: #000000 !important;
                     opacity: 1 !important;
                     filter: none !important;
                   }
 
-                  /* Wyłączenie potencjalnych nakładek hover */
+                  /* Wyłączenie domyślnych nakładek */
                   [data-ebok-welcome-button]::before,
                   [data-ebok-welcome-button]::after {
                     content: none !important;
                   }
 
-                  /* Tekst pozostaje czarny i nieprzezroczysty */
+                  /* Biały tekst w stanie normalnym */
                   [data-ebok-welcome-button] *,
-                  [data-ebok-welcome-button]:hover * {
+                  [data-ebok-welcome-button] *::before,
+                  [data-ebok-welcome-button] *::after {
+                    color: #ffffff !important;
                     opacity: 1 !important;
                     filter: none !important;
-                    color: #000000 !important;
+                    transition: color 300ms ease,
+                                fill 300ms ease !important;
                   }
 
-                  /* Rakieta pozostaje czerwona również na hoverze */
+                  /* Czarny tekst podczas hovera */
+                  [data-ebok-welcome-button]:hover *,
+                  [data-ebok-welcome-button]:hover *::before,
+                  [data-ebok-welcome-button]:hover *::after {
+                    color: #000000 !important;
+                    opacity: 1 !important;
+                    filter: none !important;
+                  }
+
+                  /* Rakieta: biała normalnie */
                   [data-ebok-welcome-button] svg,
-                  [data-ebok-welcome-button] svg *,
+                  [data-ebok-welcome-button] svg * {
+                    fill: #ffffff !important;
+                    color: #ffffff !important;
+                  }
+
+                  /* Rakieta: czerwona na hoverze */
                   [data-ebok-welcome-button]:hover svg,
                   [data-ebok-welcome-button]:hover svg * {
                     fill: #d81e04 !important;
@@ -169,8 +188,9 @@
             }
 
             return false;
-          };          let styleAttempts = 0;
+          };
 
+          let styleAttempts = 0;
           const buttonStylePoll = setInterval(() => {
             styleAttempts++;
 
