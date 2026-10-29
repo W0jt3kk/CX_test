@@ -95,6 +95,69 @@
           chatBubble.setAttribute('chat-title', 'Wirtualna Asystentka eBOK');
           df.appendChild(chatBubble);
 
+          // Stylowanie wyłącznie przycisku powitalnego
+          const styleWelcomeButton = (root) => {
+            const stack = [root];
+
+            while (stack.length) {
+              const node = stack.pop();
+
+              if (node.shadowRoot) {
+                stack.push(node.shadowRoot);
+              }
+
+              if (
+                node.matches?.('button, [role="button"], a, .button') &&
+                node.textContent?.includes('Rozumiem, zaczynajmy!')
+              ) {
+                const setButtonStyle = (hovered) => {
+                  node.style.setProperty(
+                    'background-color',
+                    hovered ? '#f5b8ad' : '#fde8e5',
+                    'important'
+                  );
+                  node.style.setProperty('color', '#8c2116', 'important');
+                  node.style.setProperty('border', '1px solid #d81e04', 'important');
+                  node.style.setProperty('opacity', '1', 'important');
+                };
+
+                node.style.setProperty(
+                  'transition',
+                  'background-color 180ms ease',
+                  'important'
+                );
+
+                setButtonStyle(false);
+
+                node.addEventListener('mouseenter', () => {
+                  setButtonStyle(true);
+                });
+
+                node.addEventListener('mouseleave', () => {
+                  setButtonStyle(false);
+                });
+
+                return true;
+              }
+
+              for (const child of node.childNodes || []) {
+                stack.push(child);
+              }
+            }
+
+            return false;
+          };
+
+          let styleAttempts = 0;
+
+          const buttonStylePoll = setInterval(() => {
+            styleAttempts++;
+
+            if (styleWelcomeButton(df) || styleAttempts >= 40) {
+              clearInterval(buttonStylePoll);
+            }
+          }, 150);
+
           let welcomeAccepted = false;
 
           const updateInput = () => {
