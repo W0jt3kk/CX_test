@@ -17,7 +17,7 @@
       --df-messenger-font-family: Google Sans;
       --df-messenger-chat-background: #f3f6fc;
       --df-messenger-chat-window-height: 75vh;
-      --df-messenger-chat-window-width: 50vw;
+      --df-messenger-chat-window-width: 35vw;
       --df-messenger-message-user-background: #d81e04;
       --df-messenger-message-user-font-color: #FFF;
       --df-messenger-message-bot-background: #ffffff;
@@ -75,17 +75,20 @@
             true
           );
 
-          const chipsPayload = [{
-            type: 'chips',
-            options: [
-              {
-                text: 'Rozumiem, zaczynajmy!',
-                mode: 'blocking'
-              }
-            ]
+          const buttonPayload = [{
+            type: 'button',
+            text: 'Rozumiem, zaczynajmy!',
+            mode: 'blocking',
+            event: {
+              event: 'welcome_accepted'
+            },
+            icon: {
+              type: 'rocket_launch',
+              color: '#d81e04'
+            }
           }];
 
-          df.renderCustomCard(chipsPayload);
+          df.renderCustomCard(buttonPayload);
 
           const chatBubble = document.createElement('df-messenger-chat-bubble');
           chatBubble.setAttribute('chat-icon', 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/favicon.png');
@@ -119,7 +122,7 @@
 
           chatBubble.addEventListener('click', waitForInput);
 
-          window.addEventListener('df-chip-clicked', (event) => {
+          window.addEventListener('df-button-clicked', (event) => {
             if (event.detail?.text !== 'Rozumiem, zaczynajmy!') return;
 
             welcomeAccepted = true;
