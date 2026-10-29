@@ -70,18 +70,22 @@
 
           df.renderCustomCard([{type: 'image', rawUrl: 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/obrazek-widget.png', accessibilityText: 'PGNiG – grafika powitalna'}]);
           
-          df.renderCustomText('Dzień dobry, jestem Wirtualną Asystentką eBOK. W czym mogę Ci pomóc?\n\nPamiętaj, że nie jestem człowiekiem. Zapytaj hasłowo – będzie mi Cię łatwiej zrozumieć.', true);
+          df.renderCustomText(
+            'Dzień dobry! Jestem Wirtualną Asystentką eBOK.\n\nPamiętaj, że nie jestem człowiekiem, a część treści jest generowana przez AI - zweryfikuj ważne informacje.',
+            true
+          );
 
-          setTimeout(() => {
-            const chipsPayload = [{
-              type: 'chips',
-              options: [
-                { text: 'Najczęstsze pytania' },
-                { text: 'Regulamin usługi / Polityka prywatności' }
-              ]
-            }];
-            df.renderCustomCard(chipsPayload);
-          }, 1500);
+          const chipsPayload = [{
+            type: 'chips',
+            options: [
+              {
+                text: 'Rozumiem, zaczynajmy!',
+                mode: 'blocking'
+              }
+            ]
+          }];
+
+          df.renderCustomCard(chipsPayload);
 
           const chatBubble = document.createElement('df-messenger-chat-bubble');
           chatBubble.setAttribute('chat-icon', 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/favicon.png');
