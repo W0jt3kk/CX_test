@@ -113,14 +113,27 @@
               ) {
                 node.setAttribute('data-ebok-welcome-button', '');
 
-                // Wyrównanie do prawej przez kontener przycisku
-                const buttonContainer = node.parentElement;
+                // Wyśrodkowanie przycisku w obszarze rozmowy
+                let card = node;
 
-                if (buttonContainer) {
-                  buttonContainer.style.setProperty('display', 'flex', 'important');
-                  buttonContainer.style.setProperty('justify-content', 'flex-end', 'important');
-                  buttonContainer.style.setProperty('width', '100%', 'important');
-                  buttonContainer.style.setProperty('box-sizing', 'border-box', 'important');
+                while (card && card.tagName !== 'DF-CARD') {
+                  card = card.parentElement || card.getRootNode().host || null;
+                }
+
+                if (card) {
+                  const messageStack = card.parentElement;
+                  const utterance = messageStack.getRootNode().host;
+                  const entry = utterance.parentElement;
+                  const content = entry.parentElement;
+
+                  if (content?.classList.contains('content')) {
+                    for (const el of [content, entry, utterance, messageStack]) {
+                      el.style.setProperty('width', '100%', 'important');
+                      el.style.setProperty('box-sizing', 'border-box', 'important');
+                    }
+
+                    card.style.setProperty('align-self', 'center', 'important');
+                  }
                 }
 
                 // Identyfikacja ikony Material Icons
