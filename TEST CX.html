@@ -145,43 +145,71 @@
                 }
 
                 if (messageList) {
-                  // Dopasowanie wysokości grafiki do dostępnego miejsca
                   const fitWelcomeImage = () => {
-                    node.style.removeProperty('max-height');
-                    node.style.setProperty('height', 'auto', 'important');
+                    if (!messageList.clientHeight) return;
 
-                    const originalHeight = node.getBoundingClientRect().height;
+                    const listStyle = getComputedStyle(messageList);
 
-                    const overflow = Math.max(
-                      0,
-                      messageList.scrollHeight - messageList.clientHeight
+                    // Pozostałe elementy powitania: tekst i przycisk
+                    const otherMessages = Array.from(content.children).filter(
+                      element => element !== entry
                     );
 
-                    const availableHeight = Math.max(
+                    const parseSize = value => parseFloat(value) || 0;
+
+                    // Wysokość pozostałych wiadomości wraz z marginesami
+                    const reservedHeight = otherMessages.reduce((sum, element) => {
+                      const style = getComputedStyle(element);
+
+                      return sum + element.offsetHeight +
+                        parseSize(style.marginTop) +
+                        parseSize(style.marginBottom);
+                    }, 0);
+
+                    // Uwzględniamy marginesy wewnętrzne obszaru rozmowy
+                    const listPadding = parseSize(listStyle.paddingTop) +
+                                        parseSize(listStyle.paddingBottom);
+
+                    // Dodatkowa wysokość kontenera obrazka
+                    const imageWrapperHeight = entry.offsetHeight - node.offsetHeight;
+
+                    // Maksymalna wysokość dostępna dla botki
+                    const maxHeight = Math.max(
                       70,
-                      Math.floor(originalHeight - overflow - 10)
+                      Math.floor(
+                        messageList.clientHeight -
+                        listPadding -
+                        reservedHeight -
+                        imageWrapperHeight -
+                        10
+                      )
                     );
 
                     node.style.setProperty(
                       'max-height',
-                      `${availableHeight}px`,
+                      `${maxHeight}px`,
                       'important'
                     );
                   };
 
-                  // Dopasowanie po załadowaniu obrazka
+                  // Automatyczne dopasowanie do rozmiaru okna czatu
+                  const resizeObserver = new ResizeObserver(fitWelcomeImage);
+                  resizeObserver.observe(messageList);
+
+                  // Ponowne obliczenie przy zmianie rozmiaru przeglądarki
+                  window.addEventListener('resize', fitWelcomeImage);
+
+                  // Pierwsze dopasowanie po załadowaniu grafiki
                   if (node.complete) {
-                    fitWelcomeImage();
+                    requestAnimationFrame(fitWelcomeImage);
                   } else {
                     node.addEventListener('load', fitWelcomeImage, { once: true });
                   }
 
-                  // Przeliczenie przy zmianie rozmiaru okna
-                  window.addEventListener('resize', fitWelcomeImage);
-
-                  // Po rozpoczęciu rozmowy nie zmniejszamy już grafiki
-                  window.addEventListener('df-button-clicked', (event) => {
+                  // Zatrzymanie dopasowywania po rozpoczęciu rozmowy
+                  window.addEventListener('df-button-clicked', event => {
                     if (event.detail?.text === 'Rozumiem, zaczynajmy!') {
+                      resizeObserver.disconnect();
                       window.removeEventListener('resize', fitWelcomeImage);
                     }
                   });
