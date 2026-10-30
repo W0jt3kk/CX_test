@@ -135,6 +135,58 @@
                 node.style.setProperty('max-width', '100%', 'important');
                 node.style.setProperty('height', 'auto', 'important');
 
+                // Znajdujemy przewijany obszar wiadomości
+                let messageList = node;
+
+                while (messageList && messageList.id !== 'message-list') {
+                  messageList = messageList.parentElement ||
+                                messageList.getRootNode().host ||
+                                null;
+                }
+
+                if (messageList) {
+                  // Dopasowanie wysokości grafiki do dostępnego miejsca
+                  const fitWelcomeImage = () => {
+                    node.style.removeProperty('max-height');
+                    node.style.setProperty('height', 'auto', 'important');
+
+                    const originalHeight = node.getBoundingClientRect().height;
+
+                    const overflow = Math.max(
+                      0,
+                      messageList.scrollHeight - messageList.clientHeight
+                    );
+
+                    const availableHeight = Math.max(
+                      70,
+                      Math.floor(originalHeight - overflow - 10)
+                    );
+
+                    node.style.setProperty(
+                      'max-height',
+                      `${availableHeight}px`,
+                      'important'
+                    );
+                  };
+
+                  // Dopasowanie po załadowaniu obrazka
+                  if (node.complete) {
+                    fitWelcomeImage();
+                  } else {
+                    node.addEventListener('load', fitWelcomeImage, { once: true });
+                  }
+
+                  // Przeliczenie przy zmianie rozmiaru okna
+                  window.addEventListener('resize', fitWelcomeImage);
+
+                  // Po rozpoczęciu rozmowy nie zmniejszamy już grafiki
+                  window.addEventListener('df-button-clicked', (event) => {
+                    if (event.detail?.text === 'Rozumiem, zaczynajmy!') {
+                      window.removeEventListener('resize', fitWelcomeImage);
+                    }
+                  });
+                }
+
                 return true;
               }
 
