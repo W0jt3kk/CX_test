@@ -139,25 +139,6 @@
                 );
               }
 
-              // Obrazki z odpowiedzi CX - maksymalnie lewa połowa rozmowy
-              if (
-                node.tagName === 'DF-CARD' &&
-                node.shadowRoot?.querySelector('df-image') &&
-                !node.shadowRoot?.querySelector('df-accordion')
-              ) {
-                node.style.setProperty('width', '100%', 'important');
-                node.style.setProperty('max-width', '50%', 'important');
-                node.style.setProperty('box-sizing', 'border-box', 'important');
-                node.style.setProperty('align-self', 'flex-start', 'important');
-
-                // Zachowanie proporcji i usunięcie zbędnych odstępów
-                node.style.setProperty(
-                  '--df-messenger-image-inner-padding',
-                  '0px',
-                  'important'
-                );
-              }
-
               if (node.shadowRoot) {
                 stack.push(...node.shadowRoot.children);
               }
