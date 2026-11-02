@@ -105,6 +105,58 @@
           df.renderCustomCard(buttonPayload);
 
           const chatElement = df.querySelector('df-messenger-chat');
+
+          // Poprawa szerokości i wyglądu accordionów
+          const restoreAccordionAppearance = () => {
+            const stack = [df];
+
+            while (stack.length) {
+              const node = stack.pop();
+
+              if (!node) continue;
+
+              if (
+                node.tagName === 'DF-CARD' &&
+                node.shadowRoot?.querySelector('df-accordion')
+              ) {
+                // Accordion zajmuje maksymalnie lewą połowę rozmowy
+                node.style.setProperty('width', '100%', 'important');
+                node.style.setProperty('max-width', '50%', 'important');
+                node.style.setProperty('box-sizing', 'border-box', 'important');
+                node.style.setProperty('align-self', 'flex-start', 'important');
+
+                // Przywrócenie wyglądu accordiona
+                node.style.setProperty(
+                  '--df-messenger-card-background',
+                  '#ffffff',
+                  'important'
+                );
+
+                node.style.setProperty(
+                  '--df-messenger-card-padding',
+                  '16px',
+                  'important'
+                );
+              }
+
+              if (node.shadowRoot) {
+                stack.push(...node.shadowRoot.children);
+              }
+
+              stack.push(...node.children);
+            }
+          };
+
+          // Poprawianie accordionów po otrzymaniu odpowiedzi z CX
+          window.addEventListener('df-response-received', () => {
+            requestAnimationFrame(restoreAccordionAppearance);
+            setTimeout(restoreAccordionAppearance, 100);
+            setTimeout(restoreAccordionAppearance, 500);
+          });
+
+          // Obsługa accordionów już obecnych w rozmowie
+          restoreAccordionAppearance();
+
           // Wyśrodkowanie wyłącznie grafiki powitalnej
           const centerWelcomeImage = (root) => {
             const stack = [root];
