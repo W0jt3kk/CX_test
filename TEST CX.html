@@ -133,9 +133,21 @@
                 card.style.setProperty('max-width', '100%', 'important');
                 card.style.setProperty('margin-top', '-40px', 'important');
                 card.style.setProperty('margin-bottom', '0', 'important');
-                
+
                 node.style.setProperty('max-width', '100%', 'important');
                 node.style.setProperty('height', 'auto', 'important');
+                node.style.setProperty('display', 'block', 'important');
+
+                // Usuwamy odstęp między grafiką a pierwszą chmurką
+                const welcomeTextEntry = entry.nextElementSibling;
+
+                if (welcomeTextEntry) {
+                  welcomeTextEntry.style.setProperty(
+                    'margin-top',
+                    '0px',
+                    'important'
+                  );
+                }
 
                 // Znajdujemy przewijany obszar wiadomości
                 let messageList = node;
