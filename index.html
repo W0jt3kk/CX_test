@@ -7,17 +7,26 @@
   <link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
   <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
   <style>
+    html, body {
+      margin: 0;
+      min-height: 100%;
+    }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     df-messenger {
       z-index: 999;
-      position: absolute;
-      bottom: 16px;
-      right: 16px;
+      display: block;
+      position: relative;
+      width: 80vw;
+      height: 92vh;
       --df-messenger-titlebar-title-font-size: 16px;
       --df-messenger-font-color: #000;
       --df-messenger-font-family: Google Sans;
       --df-messenger-chat-background: #f3f6fc;
-      --df-messenger-chat-window-height: 75vh;
-      --df-messenger-chat-window-width: 35vw;
       --df-messenger-message-user-background: #d81e04;
       --df-messenger-message-user-font-color: #FFF;
       --df-messenger-message-bot-background: #ffffff;
@@ -29,9 +38,11 @@
       --df-messenger-card-box-shadow: none;
       --df-messenger-message-bot-border: 2px solid #d81e04;
     }
-    df-messenger-chat-bubble {
-      --df-messenger-chat-bubble-background: #ffffff;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,.25));
+    @media (max-width: 700px) {
+      df-messenger {
+        width: 100vw;
+        height: 100dvh;
+      }
     }
   </style>
 </head>
@@ -40,20 +51,19 @@
     project-id="wirtualna-asystentka-cx"
     agent-id="971672d5-f388-4c83-bc51-97e8945c8ad6"
     language-code="pl"
-    chat-title="Wirtualna Asystentka eBOK"
     max-query-length="-1"
-    chat-icon='https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/favicon.png'
     url-allowlist="https://ebok.pgnig.pl, https://www.google.com, https://*.googleusercontent.com, https://*.gstatic.com, https://storage.googleapis.com, data:">
+    <df-messenger-chat chat-title="Wirtualna Asystentka eBOK"></df-messenger-chat>
   </df-messenger>
 
   <script>
     window.addEventListener('DOMContentLoaded', () => {
-      const SESSION_KEY = 'df-welcome-message-shown';
+      const SESSION_KEY = 'df-welcome-message-shown-kontakt';
       if (sessionStorage.getItem(SESSION_KEY)) return;
       const df = document.querySelector('df-messenger');
 
-      const trySetPlaceholder = chatBubble => {
-        const chat = chatBubble.shadowRoot?.querySelector('df-messenger-chat');
+      const trySetPlaceholder = chatElement => {
+        const chat = chatElement;
         const userInputContainer = chat?.shadowRoot?.querySelector('df-messenger-user-input');
         const inputBox = userInputContainer?.shadowRoot?.querySelector('.input-box-wrapper .input-content-wrapper .input-box');
         if (inputBox) {
@@ -68,7 +78,7 @@
           clearInterval(readyChecker);
           sessionStorage.setItem(SESSION_KEY, '1');
 
-          df.renderCustomCard([{type: 'image', rawUrl: 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/obrazek-widget.png', accessibilityText: 'PGNiG – grafika powitalna'}]);
+          df.renderCustomCard([{type: 'image', rawUrl: 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/lezacy-bot-czerwo.png', accessibilityText: 'PGNiG – grafika powitalna'}]);
           
           df.renderCustomText(
             'Dzień dobry! Jestem Wirtualną Asystentką eBOK.\n\nPamiętaj, że nie jestem człowiekiem, a część treści jest generowana przez AI - zweryfikuj ważne informacje.',
@@ -84,27 +94,346 @@
             },
             icon: {
               type: 'rocket_launch',
-              color: '#d81e04'
+              color: '#ffffff'
             }
           }];
 
           df.renderCustomCard(buttonPayload);
 
-          const chatBubble = document.createElement('df-messenger-chat-bubble');
-          chatBubble.setAttribute('chat-icon', 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/favicon.png');
-          chatBubble.setAttribute('chat-title', 'Wirtualna Asystentka eBOK');
-          df.appendChild(chatBubble);
+          const chatElement = df.querySelector('df-messenger-chat');
+          // Wyśrodkowanie wyłącznie grafiki powitalnej
+          const centerWelcomeImage = (root) => {
+            const stack = [root];
+
+            while (stack.length) {
+              const node = stack.pop();
+
+              if (node.shadowRoot) {
+                stack.push(node.shadowRoot);
+              }
+
+              if (
+                node.tagName === 'IMG' &&
+                node.getAttribute('src')?.includes('lezacy-bot-czerwo.png')
+              ) {
+                let card = node;
+
+                while (card && card.tagName !== 'DF-CARD') {
+                  card = card.parentElement || card.getRootNode().host || null;
+                }
+
+                if (!card) return false;
+
+                const messageStack = card.parentElement;
+                const utterance = messageStack.getRootNode().host;
+                const entry = utterance.parentElement;
+                const content = entry.parentElement;
+
+                if (!content?.classList.contains('content')) return false;
+
+                for (const el of [content, entry, utterance, messageStack]) {
+                  el.style.setProperty('width', '100%', 'important');
+                  el.style.setProperty('box-sizing', 'border-box', 'important');
+                }
+
+                card.style.setProperty('align-self', 'center', 'important');
+                card.style.setProperty('max-width', '100%', 'important');
+                card.style.setProperty('margin-top', '-40px', 'important');
+                card.style.setProperty('margin-bottom', '0', 'important');
+
+                node.style.setProperty('max-width', '100%', 'important');
+                node.style.setProperty('height', 'auto', 'important');
+                node.style.setProperty('display', 'block', 'important');
+
+                // Usuwamy odstęp między grafiką a pierwszą chmurką
+                const welcomeTextEntry = entry.nextElementSibling;
+
+                if (welcomeTextEntry) {
+                  welcomeTextEntry.style.setProperty(
+                    'margin-top',
+                    '0px',
+                    'important'
+                  );
+                }
+
+                // Znajdujemy przewijany obszar wiadomości
+                let messageList = node;
+
+                while (messageList && messageList.id !== 'message-list') {
+                  messageList = messageList.parentElement ||
+                                messageList.getRootNode().host ||
+                                null;
+                }
+
+                if (messageList) {
+                  const fitWelcomeImage = () => {
+                    if (!messageList.clientHeight) return;
+
+                    const listStyle = getComputedStyle(messageList);
+
+                    // Pozostałe elementy powitania: tekst i przycisk
+                    const otherMessages = Array.from(content.children).filter(
+                      element => element !== entry
+                    );
+
+                    const parseSize = value => parseFloat(value) || 0;
+
+                    // Wysokość pozostałych wiadomości wraz z marginesami
+                    const reservedHeight = otherMessages.reduce((sum, element) => {
+                      const style = getComputedStyle(element);
+
+                      return sum + element.offsetHeight +
+                        parseSize(style.marginTop) +
+                        parseSize(style.marginBottom);
+                    }, 0);
+
+                    // Uwzględniamy marginesy wewnętrzne obszaru rozmowy
+                    const listPadding = parseSize(listStyle.paddingTop) +
+                                        parseSize(listStyle.paddingBottom);
+
+                    // Dodatkowa wysokość kontenera obrazka
+                    const imageWrapperHeight = entry.offsetHeight - node.offsetHeight;
+
+                    // Maksymalna wysokość dostępna dla botki
+                    const maxHeight = Math.max(
+                      70,
+                      Math.floor(
+                        messageList.clientHeight -
+                        listPadding -
+                        reservedHeight -
+                        imageWrapperHeight -
+                        10
+                      )
+                    );
+
+                    node.style.setProperty(
+                      'max-height',
+                      `${maxHeight}px`,
+                      'important'
+                    );
+                  };
+
+                  // Automatyczne dopasowanie do rozmiaru okna czatu
+                  const resizeObserver = new ResizeObserver(fitWelcomeImage);
+                  resizeObserver.observe(messageList);
+
+                  // Ponowne obliczenie przy zmianie rozmiaru przeglądarki
+                  window.addEventListener('resize', fitWelcomeImage);
+
+                  // Pierwsze dopasowanie po załadowaniu grafiki
+                  if (node.complete) {
+                    requestAnimationFrame(fitWelcomeImage);
+                  } else {
+                    node.addEventListener('load', fitWelcomeImage, { once: true });
+                  }
+
+                  // Zatrzymanie dopasowywania po rozpoczęciu rozmowy
+                  window.addEventListener('df-button-clicked', event => {
+                    if (event.detail?.text === 'Rozumiem, zaczynajmy!') {
+                      resizeObserver.disconnect();
+                      window.removeEventListener('resize', fitWelcomeImage);
+                    }
+                  });
+                }
+
+                return true;
+              }
+
+              for (const child of node.children || []) {
+                stack.push(child);
+              }
+            }
+
+            return false;
+          };
+
+          let imageCenterAttempts = 0;
+
+          const imageCenterPoll = setInterval(() => {
+            imageCenterAttempts++;
+
+            if (centerWelcomeImage(df) || imageCenterAttempts >= 40) {
+              clearInterval(imageCenterPoll);
+            }
+          }, 150);
+
+          // Stylowanie wyłącznie przycisku powitalnego
+          const styleWelcomeButton = (root) => {
+            const stack = [root];
+
+            while (stack.length) {
+              const node = stack.pop();
+
+              if (node.shadowRoot) {
+                stack.push(node.shadowRoot);
+              }
+
+              if (
+                node.matches?.('button, [role="button"], a, .button') &&
+                node.textContent?.includes('Rozumiem, zaczynajmy!')
+              ) {
+                node.setAttribute('data-ebok-welcome-button', '');
+
+                // Wyśrodkowanie przycisku w obszarze rozmowy
+                let card = node;
+
+                while (card && card.tagName !== 'DF-CARD') {
+                  card = card.parentElement || card.getRootNode().host || null;
+                }
+
+                if (card) {
+                  const messageStack = card.parentElement;
+                  const utterance = messageStack.getRootNode().host;
+                  const entry = utterance.parentElement;
+                  const content = entry.parentElement;
+
+                  if (content?.classList.contains('content')) {
+                    for (const el of [content, entry, utterance, messageStack]) {
+                      el.style.setProperty('width', '100%', 'important');
+                      el.style.setProperty('box-sizing', 'border-box', 'important');
+                    }
+
+                    card.style.setProperty('align-self', 'center', 'important');
+                  }
+                }
+
+                // Identyfikacja ikony Material Icons
+                const iconNode = Array.from(node.querySelectorAll('*')).find(
+                  el => el.children.length === 0 &&
+                        el.textContent?.trim() === 'rocket_launch'
+                );
+
+                if (iconNode) {
+                  iconNode.setAttribute('data-ebok-welcome-icon', '');
+                }
+
+                const styleRoot = node.getRootNode();
+                const customStyle = document.createElement('style');
+
+                customStyle.textContent = `
+                  [data-ebok-welcome-button] {
+                    background-color: #d81e04 !important;
+                    color: #ffffff !important;
+                    border: 2px solid #d81e04 !important;
+                    box-sizing: border-box !important;
+                    box-shadow: none !important;
+                    opacity: 1 !important;
+                    filter: none !important;
+                    transition: background-color 300ms ease,
+                                color 300ms ease !important;
+                  }
+
+                  [data-ebok-welcome-button]:hover {
+                    background-color: #ffffff !important;
+                    color: #000000 !important;
+                    opacity: 1 !important;
+                    filter: none !important;
+                  }
+
+                  [data-ebok-welcome-button]::before,
+                  [data-ebok-welcome-button]::after {
+                    content: none !important;
+                  }
+
+                  /* Tekst biały w stanie normalnym */
+                  [data-ebok-welcome-button] *,
+                  [data-ebok-welcome-button] *::before,
+                  [data-ebok-welcome-button] *::after {
+                    color: #ffffff !important;
+                    opacity: 1 !important;
+                    filter: none !important;
+                    transition: color 300ms ease,
+                                fill 300ms ease !important;
+                  }
+
+                  /* Tekst czarny podczas hovera */
+                  [data-ebok-welcome-button]:hover *,
+                  [data-ebok-welcome-button]:hover *::before,
+                  [data-ebok-welcome-button]:hover *::after {
+                    color: #000000 !important;
+                    opacity: 1 !important;
+                    filter: none !important;
+                  }
+
+                  /* Rakieta jako SVG */
+                  [data-ebok-welcome-button] svg,
+                  [data-ebok-welcome-button] svg * {
+                    fill: #ffffff !important;
+                    color: #ffffff !important;
+                  }
+
+                  [data-ebok-welcome-button]:hover svg,
+                  [data-ebok-welcome-button]:hover svg * {
+                    fill: #d81e04 !important;
+                    color: #d81e04 !important;
+                  }
+
+                  /* Rakieta jako Material Icons */
+                  [data-ebok-welcome-button]:hover [data-ebok-welcome-icon],
+                  [data-ebok-welcome-button]:hover .material-icons,
+                  [data-ebok-welcome-button]:hover .material-symbols-outlined {
+                    color: #d81e04 !important;
+                  }
+                `;
+
+                styleRoot.appendChild(customStyle);
+
+                return true;
+              }
+
+              for (const child of node.childNodes || []) {
+                stack.push(child);
+              }
+            }
+
+            return false;
+          };
+          let styleAttempts = 0;
+          const buttonStylePoll = setInterval(() => {
+            styleAttempts++;
+
+            if (styleWelcomeButton(df) || styleAttempts >= 40) {
+              clearInterval(buttonStylePoll);
+            }
+          }, 150);
 
           let welcomeAccepted = false;
 
           const updateInput = () => {
-            const chat = chatBubble.shadowRoot?.querySelector('df-messenger-chat');
+            const chat = chatElement;
             const userInput = chat?.shadowRoot?.querySelector('df-messenger-user-input');
 
             if (!userInput) return false;
 
-            userInput.style.display = welcomeAccepted ? '' : 'none';
-            trySetPlaceholder(chatBubble);
+            // Input pozostaje widoczny, ale jest nieaktywny do akceptacji
+            userInput.style.display = '';
+            userInput.style.pointerEvents = welcomeAccepted ? '' : 'none';
+            userInput.style.opacity = welcomeAccepted ? '1' : '0.65';
+
+            // Delikatne ukośne kreskowanie nieaktywnego inputu
+            userInput.style.setProperty(
+              '--df-messenger-input-background',
+              welcomeAccepted
+                ? '#ffffff'
+                : 'repeating-linear-gradient(135deg, #f4f4f4 0px, #f4f4f4 3px, #dedede 3px, #dedede 4px)'
+            );
+
+            trySetPlaceholder(chatElement);
+
+            // Placeholder zależny od etapu rozmowy
+            const inputBox = userInput.shadowRoot?.querySelector(
+              '.input-box-wrapper .input-content-wrapper .input-box'
+            );
+
+            if (inputBox) {
+              inputBox.setAttribute(
+                'placeholder',
+                welcomeAccepted
+                  ? 'Tutaj wpisz swoje pytanie'
+                  : 'Aby zacząć, wybierz powyższy guzik.'
+              );
+            }
+
             return true;
           };
 
@@ -120,7 +449,7 @@
 
           waitForInput();
 
-          chatBubble.addEventListener('click', waitForInput);
+          chatElement.addEventListener('click', waitForInput);
 
           window.addEventListener('df-button-clicked', (event) => {
             if (event.detail?.text !== 'Rozumiem, zaczynajmy!') return;
@@ -134,4 +463,3 @@
   </script>
 </body>
 </html>
-
