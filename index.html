@@ -139,12 +139,20 @@
                 );
               }
 
+              // Chipsy - maksymalnie lewa połowa rozmowy
+              if (node.tagName === 'DF-CHIPS') {
+                node.style.setProperty('width', '50%', 'important');
+                node.style.setProperty('max-width', '50%', 'important');
+                node.style.setProperty('min-width', '0', 'important');
+                node.style.setProperty('box-sizing', 'border-box', 'important');
+                node.style.setProperty('align-self', 'flex-start', 'important');
+              }
+
               if (node.shadowRoot) {
                 stack.push(...node.shadowRoot.children);
               }
 
-              stack.push(...node.children);
-            }
+              stack.push(...node.children);            }
           };
 
           // Poprawianie accordionów po otrzymaniu odpowiedzi z CX
