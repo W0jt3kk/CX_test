@@ -92,10 +92,59 @@
 
           const chatBubble = document.createElement('df-messenger-chat-bubble');
           chatBubble.setAttribute('chat-icon', 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/favicon.png');
+
           chatBubble.setAttribute('chat-title', 'Wirtualna Asystentka eBOK');
           df.appendChild(chatBubble);
+
+          // Przywrócenie prawidłowego wyglądu accordionów
+          const restoreAccordionAppearance = () => {
+            const stack = [df];
+
+            while (stack.length) {
+              const node = stack.pop();
+
+              if (!node) continue;
+
+              if (
+                node.tagName === 'DF-CARD' &&
+                node.shadowRoot?.querySelector('df-accordion')
+              ) {
+                // Białe tło accordiona
+                node.style.setProperty(
+                  '--df-messenger-card-background',
+                  '#ffffff',
+                  'important'
+                );
+
+                // Prawidłowe odstępy wewnętrzne
+                node.style.setProperty(
+                  '--df-messenger-card-padding',
+                  '16px',
+                  'important'
+                );
+              }
+
+              if (node.shadowRoot) {
+                stack.push(...node.shadowRoot.children);
+              }
+
+              stack.push(...node.children);
+            }
+          };
+
+          // Automatyczne poprawianie kolejnych accordionów z CX
+          window.addEventListener('df-response-received', () => {
+            requestAnimationFrame(restoreAccordionAppearance);
+            setTimeout(restoreAccordionAppearance, 100);
+            setTimeout(restoreAccordionAppearance, 500);
+          });
+
+          // Obsługa accordionów już wyświetlonych
+          restoreAccordionAppearance();
+
           // Wyśrodkowanie wyłącznie grafiki powitalnej
           const centerWelcomeImage = (root) => {
+
             const stack = [root];
 
             while (stack.length) {
