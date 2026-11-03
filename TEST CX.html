@@ -439,6 +439,118 @@
             }
           }, 150);
 
+          // Wyśrodkowanie grafiki i przycisku względem chmurki powitalnej
+          let welcomeAlignmentAttempts = 0;
+
+          const welcomeAlignmentPoll = setInterval(() => {
+            welcomeAlignmentAttempts++;
+
+            const stack = [df];
+
+            let welcomeImage = null;
+            let welcomeButton = null;
+            let welcomeBubble = null;
+
+            while (stack.length) {
+              const node = stack.pop();
+              if (!node) continue;
+
+              if (
+                node.tagName === 'IMG' &&
+                node.getAttribute('src')?.includes('obrazek-widget.png')
+              ) {
+                welcomeImage = node;
+              }
+
+              if (node.matches?.('[data-ebok-welcome-button]')) {
+                welcomeButton = node;
+              }
+
+              if (
+                node.matches?.('.bot-message') &&
+                node.textContent?.includes(
+                  'Dzień dobry! Jestem Wirtualną Asystentką eBOK.'
+                )
+              ) {
+                welcomeBubble = node;
+              }
+
+              if (node.shadowRoot) {
+                stack.push(...node.shadowRoot.children);
+              }
+
+              stack.push(...node.children);
+            }
+
+            if (!welcomeImage || !welcomeButton || !welcomeBubble) {
+              if (welcomeAlignmentAttempts >= 40) {
+                clearInterval(welcomeAlignmentPoll);
+              }
+              return;
+            }
+
+            const findCard = (element) => {
+              let current = element;
+
+              while (current && current.tagName !== 'DF-CARD') {
+                current = current.parentElement ||
+                          current.getRootNode().host ||
+                          null;
+              }
+
+              return current;
+            };
+
+            const imageCard = findCard(welcomeImage);
+            const buttonCard = findCard(welcomeButton);
+
+            if (!imageCard || !buttonCard) {
+              if (welcomeAlignmentAttempts >= 40) {
+                clearInterval(welcomeAlignmentPoll);
+              }
+              return;
+            }
+
+            clearInterval(welcomeAlignmentPoll);
+
+            const alignWelcome = () => {
+              const bubbleRect = welcomeBubble.getBoundingClientRect();
+              const targetCenter = bubbleRect.left + bubbleRect.width / 2;
+
+              for (const card of [imageCard, buttonCard]) {
+                card.style.removeProperty('translate');
+
+                const rect = card.getBoundingClientRect();
+                const currentCenter = rect.left + rect.width / 2;
+                const offset = targetCenter - currentCenter;
+
+                card.style.setProperty(
+                  'translate',
+                  `${offset}px 0`,
+                  'important'
+                );
+              }
+            };
+
+            // Pierwsze wyrównanie
+            alignWelcome();
+
+            // Aktualizacja po zmianie rozmiaru przeglądarki
+            window.addEventListener('resize', () => {
+              requestAnimationFrame(alignWelcome);
+            });
+
+            // Aktualizacja po zmianie rozmiaru elementów powitania
+            const alignmentObserver = new ResizeObserver(() => {
+              requestAnimationFrame(alignWelcome);
+            });
+
+            alignmentObserver.observe(welcomeBubble);
+            alignmentObserver.observe(imageCard);
+            alignmentObserver.observe(buttonCard);
+
+          }, 150);
+
           let welcomeAccepted = false;
 
           const updateInput = () => {
