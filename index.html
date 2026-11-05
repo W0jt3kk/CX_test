@@ -82,7 +82,7 @@
           clearInterval(readyChecker);
           sessionStorage.setItem(SESSION_KEY, '1');
 
-          df.renderCustomCard([{type: 'image', rawUrl: 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/lezacy-bot-czerwo.png', accessibilityText: 'PGNiG – grafika powitalna'}]);
+          df.renderCustomCard([{type: 'image', rawUrl: 'https://raw.githubusercontent.com/W0jt3kk/CX_test/refs/heads/main/obrazek-widget.png', accessibilityText: 'PGNiG – grafika powitalna'}]);
           
           df.renderCustomText(
             'Dzień dobry! Jestem Wirtualną Asystentką eBOK.\n\nPamiętaj, że nie jestem człowiekiem, a część treści jest generowana przez AI - zweryfikuj ważne informacje.',
@@ -178,7 +178,7 @@
 
               if (
                 node.tagName === 'IMG' &&
-                node.getAttribute('src')?.includes('lezacy-bot-czerwo.png')
+                node.getAttribute('src')?.includes('obrazek-widget.png')
               ) {
                 let card = node;
 
@@ -480,7 +480,7 @@
 
               if (
                 node.tagName === 'IMG' &&
-                node.getAttribute('src')?.includes('lezacy-bot-czerwo.png')
+                node.getAttribute('src')?.includes('obrazek-widget.png')
               ) {
                 welcomeImage = node;
               }
